@@ -24,21 +24,64 @@ class WhatsAppTranslatorCore {
   }
 
   async init() {
-    await this.loadApiKey();
-    this.setupMutationObserver();
-    this.setupMessageObserver();
-    console.log('WhatsApp Flag Translator initialized');
+    console.log('🔧 Starting WhatsApp Flag Translator initialization...');
+    try {
+      await this.loadApiKey();
+      console.log('✅ API key loaded');
+      
+      this.setupMutationObserver();
+      console.log('✅ Mutation observer setup');
+      
+      this.setupMessageObserver();
+      console.log('✅ Message observer setup');
+      
+      console.log('🎉 WhatsApp Flag Translator fully initialized and ready!');
+      
+      // Add visual confirmation
+      this.showInitializationMessage();
+    } catch (error) {
+      console.error('❌ Error during initialization:', error);
+    }
+  }
+
+  showInitializationMessage() {
+    // Create a temporary visual indicator
+    const indicator = document.createElement('div');
+    indicator.textContent = '🌍 WhatsApp Translator Loaded';
+    indicator.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #25d366;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 9999;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    `;
+    document.body.appendChild(indicator);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      if (indicator.parentNode) {
+        indicator.parentNode.removeChild(indicator);
+      }
+    }, 3000);
   }
 
   async loadApiKey() {
     try {
+      console.log('🔑 Loading API key from storage...');
       const result = await this.browserAPI.storage.sync.get(['deepLApiKey']);
       this.deepLApiKey = result.deepLApiKey;
       if (!this.deepLApiKey) {
-        console.warn('DeepL API key not found. Please set it in the extension popup.');
+        console.warn('⚠️ DeepL API key not found. Please set it in the extension popup.');
+      } else {
+        console.log('✅ API key loaded successfully');
       }
     } catch (error) {
-      console.error('Error loading API key:', error);
+      console.error('❌ Error loading API key:', error);
     }
   }
 
@@ -62,6 +105,7 @@ class WhatsAppTranslatorCore {
 
   waitForChatContainer() {
     const checkForContainer = () => {
+      console.log('🔍 Looking for WhatsApp chat container...');
       const chatContainer = document.querySelector('[data-testid="conversation-panel-messages"]') ||
                            document.querySelector('#main') ||
                            document.querySelector('[role="main"]');
@@ -71,8 +115,9 @@ class WhatsAppTranslatorCore {
           childList: true,
           subtree: true
         });
-        console.log('Started observing chat container');
+        console.log('👀 Started observing chat container:', chatContainer.tagName);
       } else {
+        console.log('⏳ Chat container not found, retrying in 1 second...');
         setTimeout(checkForContainer, 1000);
       }
     };
@@ -142,15 +187,24 @@ class WhatsAppTranslatorCore {
       // Get unique message ID
       const messageId = this.getMessageId(messageContainer);
       
+      console.log('🎯 Flag reaction detected!', {
+        flags: flagEmojis,
+        messagePreview: messageText.substring(0, 50) + '...',
+        messageId: messageId
+      });
+      
       // Process each flag emoji
       flagEmojis.forEach(flagEmoji => {
         const targetLanguage = this.flagToLanguage[flagEmoji];
         if (targetLanguage) {
+          console.log(`🔄 Translating to ${targetLanguage} (${flagEmoji})`);
           this.translateMessage(messageContainer, messageText, targetLanguage, flagEmoji, messageId);
+        } else {
+          console.log(`⚠️ Unsupported flag emoji: ${flagEmoji}`);
         }
       });
     } catch (error) {
-      console.error('Error processing reaction:', error);
+      console.error('❌ Error processing reaction:', error);
     }
   }
 
@@ -306,13 +360,13 @@ class WhatsAppTranslatorCore {
       existingTranslation.remove();
     }
 
-    // Create translation element
+    // Create translation element that looks like a WhatsApp message bubble
     const translationDiv = document.createElement('div');
     translationDiv.className = 'flag-translation';
     translationDiv.innerHTML = `
       <div class="flag-translation-header">
         <span class="flag-emoji">${flagEmoji}</span>
-        <span class="translation-status">Translation</span>
+        <span class="translation-status">Auto-translated</span>
         <button class="close-translation" aria-label="Close translation">×</button>
       </div>
       <div class="translation-content">${translation}</div>
@@ -321,26 +375,40 @@ class WhatsAppTranslatorCore {
     // Add close button functionality
     const closeBtn = translationDiv.querySelector('.close-translation');
     closeBtn.addEventListener('click', () => {
-      translationDiv.remove();
-      this.activeTranslations.delete(messageId);
+      translationDiv.classList.add('fade-out');
+      setTimeout(() => {
+        translationDiv.remove();
+        this.activeTranslations.delete(messageId);
+      }, 300);
     });
 
-    // Insert translation after the message
-    messageContainer.appendChild(translationDiv);
+    // Insert translation after the message with slight delay for smooth appearance
+    setTimeout(() => {
+      messageContainer.appendChild(translationDiv);
+    }, 100);
 
     // Store active translation
     this.activeTranslations.set(messageId, translationDiv);
 
-    // Auto-hide after 120 seconds
+    // Auto-hide after 120 seconds with fade effect
     setTimeout(() => {
       if (translationDiv.parentNode) {
         translationDiv.classList.add('fade-out');
         setTimeout(() => {
-          translationDiv.remove();
-          this.activeTranslations.delete(messageId);
+          if (translationDiv.parentNode) {
+            translationDiv.remove();
+            this.activeTranslations.delete(messageId);
+          }
         }, 300);
       }
     }, 120000);
+
+    // Log successful translation
+    console.log('✅ Translation displayed:', {
+      flag: flagEmoji,
+      original: messageContainer.textContent?.substring(0, 50) + '...',
+      translated: translation.substring(0, 50) + '...'
+    });
   }
 
   showError(messageContainer, errorMessage) {
