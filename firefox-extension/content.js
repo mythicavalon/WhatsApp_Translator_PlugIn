@@ -15,6 +15,125 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 console.log('🔧 Browser API available:', typeof browserAPI);
 console.log('🔧 Storage API available:', typeof browserAPI.storage);
 
+// DOM Inspector for WhatsApp Web
+function inspectWhatsAppDOM() {
+  console.log('🔍 === WhatsApp DOM Inspection ===');
+  
+  // Check for common WhatsApp elements
+  const elements = {
+    'Main container': document.querySelector('#main'),
+    'App container': document.querySelector('#app'),
+    'Chat container': document.querySelector('[data-testid="conversation-panel-messages"]'),
+    'Message containers': document.querySelectorAll('[data-testid="msg-container"]'),
+    'Messages with reactions': document.querySelectorAll('[data-testid*="reaction"]'),
+    'All data-testid elements': document.querySelectorAll('[data-testid]'),
+    'Reaction elements': document.querySelectorAll('.message-reaction, [title*="reacted"]'),
+    'Text elements': document.querySelectorAll('.selectable-text, [data-testid="msg-text"]')
+  };
+  
+  Object.entries(elements).forEach(([name, element]) => {
+    if (element instanceof NodeList) {
+      console.log(`📊 ${name}:`, element.length, 'found');
+      if (element.length > 0) {
+        console.log('   Sample:', element[0]);
+      }
+    } else {
+      console.log(`📊 ${name}:`, element ? '✅ Found' : '❌ Not found');
+      if (element) {
+        console.log('   Element:', element);
+      }
+    }
+  });
+  
+  // Check if WhatsApp is fully loaded
+  const isLoaded = document.querySelector('[data-testid="msg-container"]') || 
+                   document.querySelector('.message-in') || 
+                   document.querySelector('.message-out');
+  console.log('📱 WhatsApp fully loaded:', isLoaded ? '✅ Yes' : '❌ No');
+  
+  return elements;
+}
+
+// Test reaction detection
+function testReactionDetection() {
+  console.log('🧪 === Testing Reaction Detection ===');
+  
+  // Look for existing reactions
+  const reactions = document.querySelectorAll('[data-testid*="reaction"], .message-reaction, [title*="reacted"]');
+  console.log('🎭 Found reactions:', reactions.length);
+  
+  reactions.forEach((reaction, index) => {
+    console.log(`   Reaction ${index + 1}:`, {
+      element: reaction,
+      text: reaction.textContent,
+      innerHTML: reaction.innerHTML,
+      attributes: Array.from(reaction.attributes).map(attr => `${attr.name}="${attr.value}"`).join(' ')
+    });
+  });
+  
+  // Test flag emoji extraction
+  const testTexts = ['🇫🇷', '🇯🇵🇩🇪', 'Hello 🇺🇸 World', '👍🇪🇸❤️'];
+  testTexts.forEach(text => {
+    const flags = text.match(/[\u{1F1E6}-\u{1F1FF}][\u{1F1E6}-\u{1F1FF}]/gu) || [];
+    console.log(`🏳️ "${text}" → flags:`, flags);
+  });
+}
+
+// Enhanced test function
+window.testWhatsAppTranslator = function() {
+  console.log('🧪 === Comprehensive WhatsApp Translator Test ===');
+  
+  // Basic status
+  console.log('- Extension loaded:', !!window.whatsappTranslator);
+  console.log('- Current URL:', window.location.href);
+  console.log('- Document ready state:', document.readyState);
+  
+  // DOM inspection
+  const domElements = inspectWhatsAppDOM();
+  
+  // Reaction detection test
+  testReactionDetection();
+  
+  // Extension status
+  if (window.whatsappTranslator) {
+    console.log('- API Key loaded:', !!window.whatsappTranslator.deepLApiKey);
+    console.log('- Supported languages:', Object.keys(window.whatsappTranslator.flagToLanguage).length);
+    console.log('- Active translations:', window.whatsappTranslator.activeTranslations.size);
+    console.log('- Cache size:', window.whatsappTranslator.translationCache.size);
+  }
+  
+  // Manual test trigger
+  console.log('💡 To manually test: Run simulateReaction()');
+  return domElements;
+};
+
+// Simulate a reaction for testing
+window.simulateReaction = function(flagEmoji = '🇫🇷') {
+  console.log('🎭 Simulating reaction with', flagEmoji);
+  
+  // Find a message to test with
+  const messageContainer = document.querySelector('[data-testid="msg-container"]') || 
+                          document.querySelector('.message-in') || 
+                          document.querySelector('.message-out');
+  
+  if (!messageContainer) {
+    console.log('❌ No message container found to test with');
+    return;
+  }
+  
+  // Get message text
+  const messageText = messageContainer.textContent || 'Hello, this is a test message';
+  console.log('📝 Testing with message:', messageText.substring(0, 50) + '...');
+  
+  // Try to trigger translation directly
+  if (window.whatsappTranslator) {
+    const messageId = 'test-' + Date.now();
+    window.whatsappTranslator.translateMessage(messageContainer, messageText, 'fr', flagEmoji, messageId);
+  } else {
+    console.log('❌ Translator not initialized');
+  }
+};
+
 class WhatsAppTranslator extends WhatsAppTranslatorCore {
   constructor() {
     console.log('🚀 WhatsAppTranslator constructor called');
@@ -35,6 +154,12 @@ function initializeTranslator() {
   try {
     window.whatsappTranslator = new WhatsAppTranslator();
     console.log('✅ WhatsApp Translator Extension Loaded');
+    
+    // Run DOM inspection after initialization
+    setTimeout(() => {
+      inspectWhatsAppDOM();
+      testReactionDetection();
+    }, 2000);
   } catch (error) {
     console.error('❌ Failed to initialize WhatsApp Translator:', error);
   }
@@ -52,18 +177,33 @@ function safeInitialize() {
   
   console.log('✅ On WhatsApp Web, proceeding with initialization');
   
+  // Wait for WhatsApp to load
+  const waitForWhatsApp = () => {
+    const isReady = document.querySelector('#main') || 
+                   document.querySelector('[data-testid="conversation-panel-messages"]') ||
+                   document.querySelector('[data-testid]');
+    
+    if (isReady) {
+      console.log('📱 WhatsApp elements detected, initializing...');
+      initializeTranslator();
+    } else {
+      console.log('⏳ Waiting for WhatsApp to load...');
+      setTimeout(waitForWhatsApp, 1000);
+    }
+  };
+  
   // Initialize immediately if document is ready
   if (document.readyState === 'complete') {
-    console.log('📄 Document already complete, initializing now');
-    initializeTranslator();
+    console.log('📄 Document already complete, checking WhatsApp...');
+    waitForWhatsApp();
   } else if (document.readyState === 'interactive') {
-    console.log('📄 Document interactive, initializing now');
-    initializeTranslator();
+    console.log('📄 Document interactive, checking WhatsApp...');
+    waitForWhatsApp();
   } else {
     console.log('📄 Document still loading, waiting for DOMContentLoaded');
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('📄 DOMContentLoaded fired, initializing now');
-      initializeTranslator();
+      console.log('📄 DOMContentLoaded fired, checking WhatsApp...');
+      waitForWhatsApp();
     });
   }
 }
@@ -79,7 +219,7 @@ setTimeout(() => {
   } else {
     console.log('✅ Translator already initialized');
   }
-}, 2000);
+}, 5000);
 
 // Handle navigation changes in WhatsApp Web SPA
 let currentUrl = location.href;
@@ -120,19 +260,6 @@ try {
   console.error('❌ Failed to register message listener:', error);
 }
 
-// Debug function to test extension
-window.testWhatsAppTranslator = function() {
-  console.log('🧪 Testing WhatsApp Translator...');
-  console.log('- Extension loaded:', !!window.whatsappTranslator);
-  console.log('- Current URL:', window.location.href);
-  console.log('- Document ready state:', document.readyState);
-  console.log('- WhatsApp elements found:', document.querySelectorAll('[data-testid]').length);
-  
-  if (window.whatsappTranslator) {
-    console.log('- API Key loaded:', !!window.whatsappTranslator.deepLApiKey);
-    console.log('- Supported languages:', Object.keys(window.whatsappTranslator.flagToLanguage).length);
-  }
-};
-
 console.log('🎯 Firefox content script setup complete!');
 console.log('💡 To test: Open browser console and run testWhatsAppTranslator()');
+console.log('🎭 To simulate: Run simulateReaction("🇫🇷")');
