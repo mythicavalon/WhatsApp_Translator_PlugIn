@@ -7,16 +7,24 @@
   "permissions": [
     "storage",
     "activeTab",
+    "tabs",
     "https://web.whatsapp.com/*",
-    "tabs"
+    "https://*.whatsapp.com/*"
   ],
   
   "content_scripts": [
     {
-      "matches": ["https://web.whatsapp.com/*"],
-      "js": ["translator-core.js", "content.js"],
-      "css": ["styles.css"],
-      "run_at": "document_end",
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://*.whatsapp.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
+      "run_at": "document_start",
       "all_frames": false
     }
   ],
@@ -27,7 +35,8 @@
   },
   
   "web_accessible_resources": [
-    "styles.css"
+    "styles.css",
+    "translator-core.js"
   ],
   
   "applications": {
