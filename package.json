@@ -1,0 +1,34 @@
+{
+  "name": "whatsapp-flag-translator",
+  "version": "1.0.0",
+  "description": "Chrome Extension for translating WhatsApp messages with flag emoji reactions",
+  "main": "content.js",
+  "scripts": {
+    "build": "echo 'No build process needed - this is a Chrome extension'",
+    "test": "echo 'No tests configured yet'",
+    "lint": "echo 'No linting configured yet'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "whatsapp",
+    "translation",
+    "deepl",
+    "emoji",
+    "multilingual"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/whatsapp-flag-translator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/whatsapp-flag-translator/issues"
+  },
+  "homepage": "https://github.com/yourusername/whatsapp-flag-translator#readme",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "chrome": ">=88"
+  }
+}

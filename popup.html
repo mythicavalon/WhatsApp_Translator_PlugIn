@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Flag Translator</title>
+  <style>
+    body {
+      width: 350px;
+      min-height: 400px;
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      color: #25d366;
+      font-weight: 600;
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .section {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .section h2 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e1e5e9;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: monospace;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #25d366;
+    }
+
+    .btn {
+      background: #25d366;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background: #20b358;
+    }
+
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .help-text a {
+      color: #25d366;
+      text-decoration: none;
+    }
+
+    .help-text a:hover {
+      text-decoration: underline;
+    }
+
+    .usage-guide {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .usage-guide h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .usage-guide ol {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .usage-guide li {
+      margin-bottom: 4px;
+    }
+
+    .flag-examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .flag-example {
+      background: white;
+      border: 1px solid #e1e5e9;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #e1e5e9;
+    }
+
+    .footer p {
+      margin: 0;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .version {
+      font-size: 11px;
+      color: #ccc;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌍 WhatsApp Flag Translator</h1>
+    <p>Translate messages with flag emoji reactions</p>
+  </div>
+
+  <div id="status-container"></div>
+
+  <div class="section">
+    <h2>DeepL API Configuration</h2>
+    <div class="form-group">
+      <label for="apiKey">DeepL API Key</label>
+      <input type="text" id="apiKey" placeholder="Enter your DeepL API key...">
+      <div class="help-text">
+        Get your free API key from <a href="https://www.deepl.com/pro-api" target="_blank">DeepL Pro API</a>
+      </div>
+    </div>
+    <button class="btn" id="saveBtn">Save API Key</button>
+  </div>
+
+  <div class="section">
+    <h2>How to Use</h2>
+    <div class="usage-guide">
+      <h3>Simple Steps:</h3>
+      <ol>
+        <li>React to any WhatsApp message with a flag emoji</li>
+        <li>The extension will automatically translate the message</li>
+        <li>Translation appears below the original message</li>
+        <li>Auto-hides after 2 minutes or click × to close</li>
+      </ol>
+    </div>
+
+    <div class="usage-guide">
+      <h3>Supported Flags:</h3>
+      <div class="flag-examples">
+        <span class="flag-example">🇺🇸 English</span>
+        <span class="flag-example">🇪🇸 Spanish</span>
+        <span class="flag-example">🇫🇷 French</span>
+        <span class="flag-example">🇩🇪 German</span>
+        <span class="flag-example">🇮🇹 Italian</span>
+        <span class="flag-example">🇯🇵 Japanese</span>
+        <span class="flag-example">🇰🇷 Korean</span>
+        <span class="flag-example">🇨🇳 Chinese</span>
+        <span class="flag-example">🇷🇺 Russian</span>
+        <span class="flag-example">🇵🇹 Portuguese</span>
+        <span class="flag-example">🇳🇱 Dutch</span>
+        <span class="flag-example">🇵🇱 Polish</span>
+        <span class="flag-example">🇮🇳 Hindi</span>
+        <span class="flag-example">🇸🇦 Arabic</span>
+        <span class="flag-example">+ 20 more</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Made with ❤️ for WhatsApp Web</p>
+    <div class="version">v1.0.0</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
