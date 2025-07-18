@@ -13,8 +13,8 @@
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
-      "js": ["content.js"],
-      "css": ["styles.css"],
+      "js": ["../shared/translator-core.js", "content.js"],
+      "css": ["../shared/styles.css"],
       "run_at": "document_end"
     }
   ],
@@ -29,7 +29,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["styles.css"],
+      "resources": ["../shared/styles.css"],
       "matches": ["https://web.whatsapp.com/*"]
     }
   ]

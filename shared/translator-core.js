@@ -1,10 +1,11 @@
 /**
- * WhatsApp Flag Translator - Content Script
- * Detects flag emoji reactions and translates messages in-place
+ * WhatsApp Flag Translator - Core Logic
+ * Shared between Chrome and Firefox extensions
  */
 
-class WhatsAppTranslator {
-  constructor() {
+class WhatsAppTranslatorCore {
+  constructor(browserAPI) {
+    this.browserAPI = browserAPI; // chrome or browser API
     this.deepLApiKey = null;
     this.flagToLanguage = {
       '🇺🇸': 'en-US', '🇬🇧': 'en-GB', '🇪🇸': 'es', '🇫🇷': 'fr', '🇩🇪': 'de',
@@ -20,7 +21,6 @@ class WhatsAppTranslator {
     this.translationCache = new Map();
     this.activeTranslations = new Map();
     this.observer = null;
-    this.init();
   }
 
   async init() {
@@ -32,7 +32,7 @@ class WhatsAppTranslator {
 
   async loadApiKey() {
     try {
-      const result = await chrome.storage.sync.get(['deepLApiKey']);
+      const result = await this.browserAPI.storage.sync.get(['deepLApiKey']);
       this.deepLApiKey = result.deepLApiKey;
       if (!this.deepLApiKey) {
         console.warn('DeepL API key not found. Please set it in the extension popup.');
@@ -372,34 +372,3 @@ class WhatsAppTranslator {
     }, 5000);
   }
 }
-
-// Initialize the translator when the page loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    window.whatsappTranslator = new WhatsAppTranslator();
-  });
-} else {
-  window.whatsappTranslator = new WhatsAppTranslator();
-}
-
-// Handle navigation changes in WhatsApp Web SPA
-let currentUrl = location.href;
-new MutationObserver(() => {
-  if (location.href !== currentUrl) {
-    currentUrl = location.href;
-    // Reinitialize on navigation
-    setTimeout(() => {
-      window.whatsappTranslator = new WhatsAppTranslator();
-    }, 1000);
-  }
-}).observe(document, { subtree: true, childList: true });
-
-// Handle messages from popup
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'apiKeyUpdated') {
-    // Reload API key when updated from popup
-    if (window.whatsappTranslator) {
-      window.whatsappTranslator.loadApiKey();
-    }
-  }
-});
