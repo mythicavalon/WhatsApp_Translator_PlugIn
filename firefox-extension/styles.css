@@ -4,33 +4,38 @@
  */
 
 .flag-translation {
-  margin: 8px 0 4px 0;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
-  border-left: 3px solid #25d366;
+  margin: 6px 0 4px 0;
+  padding: 6px 10px;
+  background: #e7f3ff;
+  border-radius: 6px;
   font-family: inherit;
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.3;
   animation: slideIn 0.3s ease-out;
   position: relative;
-  max-width: 100%;
+  max-width: 80%;
   word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border: 1px solid #d1e7dd;
+  opacity: 0.9;
+  transform: scale(0.8);
+  transform-origin: left top;
 }
 
 /* Dark mode support */
 [data-theme="dark"] .flag-translation,
 .dark .flag-translation {
-  background: rgba(255, 255, 255, 0.1);
+  background: #1f2937;
   color: #e9edef;
+  border: 1px solid #374151;
 }
 
 .flag-translation-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  font-size: 12px;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 9px;
   color: #667781;
   font-weight: 500;
 }
@@ -41,7 +46,7 @@
 }
 
 .flag-emoji {
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1;
 }
 
@@ -56,11 +61,11 @@
   border: none;
   color: #667781;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 1;
   padding: 0;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,10 +91,11 @@
 
 .translation-content {
   color: #111b21;
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.3;
   margin: 0;
   padding: 0;
+  font-weight: 400;
 }
 
 [data-theme="dark"] .translation-content,

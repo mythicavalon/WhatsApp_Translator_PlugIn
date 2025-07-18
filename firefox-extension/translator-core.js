@@ -187,15 +187,24 @@ class WhatsAppTranslatorCore {
       // Get unique message ID
       const messageId = this.getMessageId(messageContainer);
       
+      console.log('🎯 Flag reaction detected!', {
+        flags: flagEmojis,
+        messagePreview: messageText.substring(0, 50) + '...',
+        messageId: messageId
+      });
+      
       // Process each flag emoji
       flagEmojis.forEach(flagEmoji => {
         const targetLanguage = this.flagToLanguage[flagEmoji];
         if (targetLanguage) {
+          console.log(`🔄 Translating to ${targetLanguage} (${flagEmoji})`);
           this.translateMessage(messageContainer, messageText, targetLanguage, flagEmoji, messageId);
+        } else {
+          console.log(`⚠️ Unsupported flag emoji: ${flagEmoji}`);
         }
       });
     } catch (error) {
-      console.error('Error processing reaction:', error);
+      console.error('❌ Error processing reaction:', error);
     }
   }
 
@@ -351,13 +360,13 @@ class WhatsAppTranslatorCore {
       existingTranslation.remove();
     }
 
-    // Create translation element
+    // Create translation element that looks like a WhatsApp message bubble
     const translationDiv = document.createElement('div');
     translationDiv.className = 'flag-translation';
     translationDiv.innerHTML = `
       <div class="flag-translation-header">
         <span class="flag-emoji">${flagEmoji}</span>
-        <span class="translation-status">Translation</span>
+        <span class="translation-status">Auto-translated</span>
         <button class="close-translation" aria-label="Close translation">×</button>
       </div>
       <div class="translation-content">${translation}</div>
@@ -366,26 +375,40 @@ class WhatsAppTranslatorCore {
     // Add close button functionality
     const closeBtn = translationDiv.querySelector('.close-translation');
     closeBtn.addEventListener('click', () => {
-      translationDiv.remove();
-      this.activeTranslations.delete(messageId);
+      translationDiv.classList.add('fade-out');
+      setTimeout(() => {
+        translationDiv.remove();
+        this.activeTranslations.delete(messageId);
+      }, 300);
     });
 
-    // Insert translation after the message
-    messageContainer.appendChild(translationDiv);
+    // Insert translation after the message with slight delay for smooth appearance
+    setTimeout(() => {
+      messageContainer.appendChild(translationDiv);
+    }, 100);
 
     // Store active translation
     this.activeTranslations.set(messageId, translationDiv);
 
-    // Auto-hide after 120 seconds
+    // Auto-hide after 120 seconds with fade effect
     setTimeout(() => {
       if (translationDiv.parentNode) {
         translationDiv.classList.add('fade-out');
         setTimeout(() => {
-          translationDiv.remove();
-          this.activeTranslations.delete(messageId);
+          if (translationDiv.parentNode) {
+            translationDiv.remove();
+            this.activeTranslations.delete(messageId);
+          }
         }, 300);
       }
     }, 120000);
+
+    // Log successful translation
+    console.log('✅ Translation displayed:', {
+      flag: flagEmoji,
+      original: messageContainer.textContent?.substring(0, 50) + '...',
+      translated: translation.substring(0, 50) + '...'
+    });
   }
 
   showError(messageContainer, errorMessage) {
