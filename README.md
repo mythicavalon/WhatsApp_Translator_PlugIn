@@ -38,15 +38,12 @@ A **Cross-Browser Extension** that enables instant translation of WhatsApp Web m
 3. Click "This Firefox" → "Load Temporary Add-on"
 4. Select the `manifest.json` file in the `firefox-extension` folder
 
-### 3. Build Extensions (For Distribution)
+### 3. Generate Icons (Optional)
 
-```bash
-# Build both extensions for distribution
-node build.js build
-
-# Clean build files (for development)
-node build.js clean
-```
+Both extensions need icon files. You can:
+- Use any 16x16, 48x48, and 128x128 PNG icons
+- Place them in the respective `icons/` folders
+- Name them: `icon16.png`, `icon48.png`, `icon128.png`
 
 ### 4. Configure API Key
 
@@ -98,29 +95,29 @@ whatsapp-flag-translator/
 │   ├── content.js
 │   ├── popup.html
 │   ├── popup.js
+│   ├── translator-core.js
+│   ├── styles.css
 │   └── icons/
 ├── firefox-extension/         # Firefox Extension (Manifest V2)
 │   ├── manifest.json
 │   ├── content.js
 │   ├── popup.html
 │   ├── popup.js
+│   ├── translator-core.js
+│   ├── styles.css
 │   └── icons/
-├── shared/                    # Shared code between browsers
-│   ├── translator-core.js     # Core translation logic
-│   └── styles.css            # Shared styles
-├── build.js                   # Build script
-├── create-icons.html          # Icon generator
+├── .github/
+│   └── FUNDING.yml           # GitHub Sponsors configuration
 ├── README.md                  # This file
-├── INSTALL.md                 # Installation guide
 └── LICENSE                    # MIT License
 ```
 
 ### Key Components
 
-- **WhatsAppTranslatorCore**: Shared translation logic
+- **WhatsAppTranslatorCore**: Core translation logic with 40+ language support
 - **Browser-Specific Wrappers**: Chrome/Firefox API bindings
-- **Shared Styles**: Consistent UI across browsers
-- **Build System**: Automated file copying and manifest updates
+- **Consistent UI**: Identical styling and behavior across browsers
+- **Self-Contained**: Each extension folder is complete and ready to install
 
 ### Browser Compatibility
 
@@ -146,25 +143,18 @@ whatsapp-flag-translator/
 git clone https://github.com/yourusername/whatsapp-flag-translator.git
 cd whatsapp-flag-translator
 
-# For development, use the shared folder structure
-# Chrome: Load chrome-extension/ folder
-# Firefox: Load firefox-extension/ folder
-
-# For distribution, build first
-node build.js build
+# Load extensions in browsers
+# Chrome: Load chrome-extension/ folder in Developer Mode
+# Firefox: Load firefox-extension/ folder as Temporary Add-on
 ```
 
-### Development vs Production
+### Ready to Use
 
-**Development Mode:**
-- Files reference `../shared/` for easy editing
-- Changes to shared files affect both extensions
-- Use `node build.js clean` to maintain this structure
-
-**Production Mode:**
-- Files are copied to each extension folder
-- Self-contained extension packages
-- Use `node build.js build` before distribution
+Both extension folders are **complete and self-contained**:
+- All necessary files included
+- No build process required
+- Ready for immediate installation
+- Ready for store submission
 
 ### Testing
 
@@ -177,22 +167,23 @@ node build.js build
 
 ### Adding New Languages
 
-1. Edit `shared/translator-core.js`
+1. Edit `translator-core.js` in both extension folders
 2. Add flag emoji and language code to `flagToLanguage` object
 3. Ensure DeepL supports the target language
 4. Update documentation
 
 ### Modifying Styles
 
-1. Edit `shared/styles.css`
-2. Changes apply to both browsers
-3. Test in both light and dark modes
-4. Ensure responsive design works
+1. Edit `styles.css` in both extension folders
+2. Test in both light and dark modes
+3. Ensure responsive design works
+4. Keep both versions synchronized
 
 ### Browser-Specific Features
 
-- **Chrome**: Modify `chrome-extension/content.js` or `chrome-extension/popup.js`
-- **Firefox**: Modify `firefox-extension/content.js` or `firefox-extension/popup.js`
+- **Chrome**: Modify files in `chrome-extension/` folder
+- **Firefox**: Modify files in `firefox-extension/` folder
+- **Shared Logic**: Update `translator-core.js` in both folders
 
 ## 🔒 Privacy & Security
 
@@ -207,23 +198,23 @@ node build.js build
 
 ### Chrome Web Store
 
-1. Run `node build.js build`
-2. Zip the `chrome-extension/` folder
-3. Upload to Chrome Web Store Developer Dashboard
-4. Follow Chrome Web Store guidelines
+1. Zip the `chrome-extension/` folder
+2. Upload to Chrome Web Store Developer Dashboard
+3. Follow Chrome Web Store guidelines
+4. Submit for review
 
 ### Firefox Add-ons (AMO)
 
-1. Run `node build.js build`
-2. Zip the `firefox-extension/` folder
-3. Upload to Firefox Add-on Developer Hub
-4. Follow Mozilla Add-on guidelines
+1. Zip the `firefox-extension/` folder
+2. Upload to Firefox Add-on Developer Hub
+3. Follow Mozilla Add-on guidelines
+4. Submit for review
 
 ### Manual Installation
 
 Users can install directly from GitHub:
 1. Download the repository
-2. Follow installation instructions in `INSTALL.md`
+2. Choose the appropriate extension folder for their browser
 3. Load as unpacked/temporary extension
 
 ## 🐛 Troubleshooting
@@ -249,15 +240,21 @@ Users can install directly from GitHub:
 
 Contributions welcome! Please consider:
 
-1. **Shared Code**: Changes to core logic go in `shared/`
+1. **Core Logic**: Update `translator-core.js` in both extension folders
 2. **Browser-Specific**: Only when necessary for API differences
 3. **Testing**: Test on both Chrome and Firefox
-4. **Documentation**: Update README and INSTALL.md
-5. **Build Process**: Ensure `build.js` handles new files
+4. **Documentation**: Update README for any changes
+5. **Synchronization**: Keep both extension folders in sync
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## ☕ Support the Project
+
+Love this extension? Help keep it maintained and growing:
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/amalnair11)
 
 ## 🙏 Acknowledgments
 
