@@ -16,43 +16,74 @@ A **Cross-Browser Extension** that enables instant translation of WhatsApp Web m
 - **Dark Mode**: Full support for WhatsApp Web's dark theme
 - **Privacy-First**: No data collection, fully client-side processing
 
-## 🚀 Quick Start
+## 📥 Download & Install
 
-### 1. Get a DeepL API Key
+### Quick Download (Recommended)
+
+**Ready-to-install extensions:**
+
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Download-blue?style=for-the-badge&logo=google-chrome)](https://github.com/mythicavalon/WhatsApp_Translator_PlugIn/raw/main/release-zips/whatsapp-flag-translator-chrome.zip) [![Firefox Extension](https://img.shields.io/badge/Firefox-Download-orange?style=for-the-badge&logo=firefox)](https://github.com/mythicavalon/WhatsApp_Translator_PlugIn/raw/main/release-zips/whatsapp-flag-translator-firefox.zip)
+
+### 🎯 Key Features & Browser Support
+
+**🌍 Universal Translation**
+- 40+ languages supported
+- Instant translation with flag emoji reactions
+- Smart text compression (20% shorter while preserving meaning)
+
+**🔧 Cross-Browser Compatibility**
+- ✅ **Chrome 88+** (Manifest V3)
+- ✅ **Firefox 78+** (Manifest V2) 
+- ✅ **Edge 88+** (Chromium-based)
+- ✅ **Opera 74+** (Chromium-based)
+
+**⚡ Performance & UX**
+- Intelligent caching system
+- Auto-hide after 2 minutes
+- WhatsApp-native styling
+- Dark mode support
+- Mobile-responsive design
+
+**🔒 Privacy & Security**
+- No data collection
+- Client-side processing only
+- Secure API key storage
+- Minimal permissions required
+
+### 🧪 Manual Installation
+
+#### For Chrome:
+1. **Download**: Click the Chrome download button above
+2. **Extract**: Unzip the downloaded file
+3. **Install**: 
+   - Open Chrome and go to `chrome://extensions/`
+   - Enable "Developer mode" (top right toggle)
+   - Click "Load unpacked" and select the extracted folder
+
+#### For Firefox:
+1. **Download**: Click the Firefox download button above
+2. **Extract**: Unzip the downloaded file
+3. **Install**:
+   - Open Firefox and go to `about:debugging`
+   - Click "This Firefox" → "Load Temporary Add-on"
+   - Select the `manifest.json` file in the extracted folder
+
+### 🚀 Setup
+
+#### 1. Get a DeepL API Key
 
 1. Visit [DeepL Pro API](https://www.deepl.com/pro-api)
 2. Sign up for a free account (500,000 characters/month free)
 3. Get your API authentication key
 
-### 2. Choose Your Browser
-
-#### For Chrome:
-1. Download the `chrome-extension/` folder
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode" (top right toggle)
-4. Click "Load unpacked" and select the `chrome-extension` folder
-
-#### For Firefox:
-1. Download the `firefox-extension/` folder
-2. Open Firefox and go to `about:debugging`
-3. Click "This Firefox" → "Load Temporary Add-on"
-4. Select the `manifest.json` file in the `firefox-extension` folder
-
-### 3. Generate Icons (Optional)
-
-Both extensions need icon files. You can:
-- Use any 16x16, 48x48, and 128x128 PNG icons
-- Place them in the respective `icons/` folders
-- Name them: `icon16.png`, `icon48.png`, `icon128.png`
-
-### 4. Configure API Key
+#### 2. Configure Extension
 
 1. Click the extension icon in your browser toolbar
 2. Enter your DeepL API key in the popup
 3. Click "Save API Key"
 4. You're ready to translate!
 
-### 5. Start Translating
+### 🎯 How to Use
 
 1. Open [WhatsApp Web](https://web.whatsapp.com)
 2. Find a message you want to translate
@@ -252,9 +283,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## ☕ Support the Project
 
-Love this extension? Help keep it maintained and growing:
+**Love this extension?** Help keep it maintained and growing! Your support enables continued development, new features, and maintenance.
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/amalnair11)
+### 💳 Donate via PayPal
+
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/paypalme/amalnair11)
+
+**Why donate?**
+- ✅ Keep the extension free and open source
+- ✅ Support new language additions
+- ✅ Fund regular WhatsApp Web compatibility updates
+- ✅ Enable faster bug fixes and feature development
+
+**Even $1 helps!** Every contribution, no matter how small, makes a difference in keeping this project alive and improving.
 
 ## 🙏 Acknowledgments
 
