@@ -24,21 +24,64 @@ class WhatsAppTranslatorCore {
   }
 
   async init() {
-    await this.loadApiKey();
-    this.setupMutationObserver();
-    this.setupMessageObserver();
-    console.log('WhatsApp Flag Translator initialized');
+    console.log('🔧 Starting WhatsApp Flag Translator initialization...');
+    try {
+      await this.loadApiKey();
+      console.log('✅ API key loaded');
+      
+      this.setupMutationObserver();
+      console.log('✅ Mutation observer setup');
+      
+      this.setupMessageObserver();
+      console.log('✅ Message observer setup');
+      
+      console.log('🎉 WhatsApp Flag Translator fully initialized and ready!');
+      
+      // Add visual confirmation
+      this.showInitializationMessage();
+    } catch (error) {
+      console.error('❌ Error during initialization:', error);
+    }
+  }
+
+  showInitializationMessage() {
+    // Create a temporary visual indicator
+    const indicator = document.createElement('div');
+    indicator.textContent = '🌍 WhatsApp Translator Loaded';
+    indicator.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #25d366;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 9999;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    `;
+    document.body.appendChild(indicator);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      if (indicator.parentNode) {
+        indicator.parentNode.removeChild(indicator);
+      }
+    }, 3000);
   }
 
   async loadApiKey() {
     try {
+      console.log('🔑 Loading API key from storage...');
       const result = await this.browserAPI.storage.sync.get(['deepLApiKey']);
       this.deepLApiKey = result.deepLApiKey;
       if (!this.deepLApiKey) {
-        console.warn('DeepL API key not found. Please set it in the extension popup.');
+        console.warn('⚠️ DeepL API key not found. Please set it in the extension popup.');
+      } else {
+        console.log('✅ API key loaded successfully');
       }
     } catch (error) {
-      console.error('Error loading API key:', error);
+      console.error('❌ Error loading API key:', error);
     }
   }
 
@@ -62,6 +105,7 @@ class WhatsAppTranslatorCore {
 
   waitForChatContainer() {
     const checkForContainer = () => {
+      console.log('🔍 Looking for WhatsApp chat container...');
       const chatContainer = document.querySelector('[data-testid="conversation-panel-messages"]') ||
                            document.querySelector('#main') ||
                            document.querySelector('[role="main"]');
@@ -71,8 +115,9 @@ class WhatsAppTranslatorCore {
           childList: true,
           subtree: true
         });
-        console.log('Started observing chat container');
+        console.log('👀 Started observing chat container:', chatContainer.tagName);
       } else {
+        console.log('⏳ Chat container not found, retrying in 1 second...');
         setTimeout(checkForContainer, 1000);
       }
     };
