@@ -237,6 +237,8 @@ class WhatsAppTranslatorCore {
   }
 
   checkForReactions(element) {
+    console.log('🔍 Checking for reactions in element:', element);
+    
     // Multiple strategies to find reactions
     const reactionSelectors = [
       '[data-testid*="reaction"]',
@@ -252,17 +254,26 @@ class WhatsAppTranslatorCore {
     
     // Check if element itself is a reaction
     if (this.isReactionElement(element)) {
+      console.log('✅ Element itself is a reaction');
       reactions.push(element);
     }
     
     // Search within the element
     reactionSelectors.forEach(selector => {
       const found = element.querySelectorAll ? element.querySelectorAll(selector) : [];
+      if (found.length > 0) {
+        console.log(`🎯 Found ${found.length} reactions with selector: ${selector}`);
+      }
       reactions.push(...found);
     });
     
+    console.log(`📊 Total reactions found: ${reactions.length}`);
+    
     // Process each reaction found
-    reactions.forEach(reaction => this.processReaction(reaction));
+    reactions.forEach(reaction => {
+      console.log('🔄 Processing reaction:', reaction);
+      this.processReaction(reaction);
+    });
   }
 
   isReactionElement(element) {

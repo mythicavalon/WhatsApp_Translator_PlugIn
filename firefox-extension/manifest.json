@@ -9,7 +9,8 @@
     "activeTab",
     "tabs",
     "https://web.whatsapp.com/*",
-    "https://*.whatsapp.com/*"
+    "https://*.whatsapp.com/*",
+    "https://api-free.deepl.com/*"
   ],
   
   "content_scripts": [

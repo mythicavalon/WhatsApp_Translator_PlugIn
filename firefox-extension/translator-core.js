@@ -165,11 +165,18 @@ class WhatsAppTranslatorCore {
   }
 
   setupMutationObserver() {
+    console.log('🔧 Setting up mutation observer...');
+    
     this.observer = new MutationObserver((mutations) => {
+      console.log(`👀 Mutation observer triggered with ${mutations.length} mutations`);
+      
       mutations.forEach((mutation) => {
+        console.log('🔄 Processing mutation:', mutation.type, mutation);
+        
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
+              console.log('➕ New element added:', node);
               this.checkForReactions(node);
             }
           });
@@ -237,6 +244,8 @@ class WhatsAppTranslatorCore {
   }
 
   checkForReactions(element) {
+    console.log('🔍 Checking for reactions in element:', element);
+    
     // Multiple strategies to find reactions
     const reactionSelectors = [
       '[data-testid*="reaction"]',
@@ -252,17 +261,26 @@ class WhatsAppTranslatorCore {
     
     // Check if element itself is a reaction
     if (this.isReactionElement(element)) {
+      console.log('✅ Element itself is a reaction');
       reactions.push(element);
     }
     
     // Search within the element
     reactionSelectors.forEach(selector => {
       const found = element.querySelectorAll ? element.querySelectorAll(selector) : [];
+      if (found.length > 0) {
+        console.log(`🎯 Found ${found.length} reactions with selector: ${selector}`);
+      }
       reactions.push(...found);
     });
     
+    console.log(`📊 Total reactions found: ${reactions.length}`);
+    
     // Process each reaction found
-    reactions.forEach(reaction => this.processReaction(reaction));
+    reactions.forEach(reaction => {
+      console.log('🔄 Processing reaction:', reaction);
+      this.processReaction(reaction);
+    });
   }
 
   isReactionElement(element) {
@@ -281,22 +299,41 @@ class WhatsAppTranslatorCore {
 
   processReaction(reactionElement) {
     try {
+      console.log('🎭 Processing reaction element:', reactionElement);
+      
       // Find flag emojis in the reaction
       const reactionText = this.getElementText(reactionElement);
-      const flagEmojis = this.extractFlagEmojis(reactionText);
+      console.log('📝 Reaction text:', reactionText);
       
-      if (flagEmojis.length === 0) return;
+      const flagEmojis = this.extractFlagEmojis(reactionText);
+      console.log('🏳️ Flag emojis found:', flagEmojis);
+      
+      if (flagEmojis.length === 0) {
+        console.log('❌ No flag emojis found in reaction');
+        return;
+      }
 
       // Find the associated message with multiple strategies
       const messageContainer = this.findMessageContainer(reactionElement);
-      if (!messageContainer) return;
+      console.log('📦 Message container found:', messageContainer);
+      
+      if (!messageContainer) {
+        console.log('❌ No message container found');
+        return;
+      }
 
       // Extract message text
       const messageText = this.extractMessageText(messageContainer);
-      if (!messageText || messageText.length < 2) return;
+      console.log('💬 Message text extracted:', messageText);
+      
+      if (!messageText || messageText.length < 2) {
+        console.log('❌ No valid message text found');
+        return;
+      }
 
       // Get unique message ID
       const messageId = this.getMessageId(messageContainer);
+      console.log('🆔 Message ID:', messageId);
       
       this.log('🎯 Flag reaction detected!', {
         flags: flagEmojis,

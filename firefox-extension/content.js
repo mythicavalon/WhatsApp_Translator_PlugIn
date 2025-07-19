@@ -23,35 +23,47 @@ function createVisualBanner() {
   
   const banner = document.createElement('div');
   banner.id = 'whatsapp-translator-banner';
-  banner.innerHTML = `
-    <div style="
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: #ff4444;
-      color: white;
-      padding: 10px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 16px;
-      z-index: 999999;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      font-family: Arial, sans-serif;
-    ">
-      🌍 WhatsApp Flag Translator Extension Loaded Successfully!
-      <button onclick="this.parentElement.parentElement.remove()" style="
-        margin-left: 20px;
-        background: white;
-        color: #ff4444;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 3px;
-        cursor: pointer;
-        font-weight: bold;
-      ">Close</button>
-    </div>
+  
+  const bannerContent = document.createElement('div');
+  bannerContent.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #ff4444;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 999999;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    font-family: Arial, sans-serif;
   `;
+  
+  const text = document.createTextNode('🌍 WhatsApp Flag Translator Extension Loaded Successfully!');
+  bannerContent.appendChild(text);
+  
+  const closeButton = document.createElement('button');
+  closeButton.textContent = 'Close';
+  closeButton.style.cssText = `
+    margin-left: 20px;
+    background: white;
+    color: #ff4444;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: bold;
+  `;
+  
+  // Add event listener instead of inline onclick
+  closeButton.addEventListener('click', () => {
+    banner.remove();
+  });
+  
+  bannerContent.appendChild(closeButton);
+  banner.appendChild(bannerContent);
   
   // Insert banner immediately
   if (document.body) {
@@ -156,35 +168,49 @@ if (isWhatsAppWeb) {
         // Update banner to show success
         const banner = document.getElementById('whatsapp-translator-banner');
         if (banner) {
-          banner.innerHTML = `
-            <div style="
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100%;
-              background: #25d366;
-              color: white;
-              padding: 10px;
-              text-align: center;
-              font-weight: bold;
-              font-size: 16px;
-              z-index: 999999;
-              box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-              font-family: Arial, sans-serif;
-            ">
-              🎉 WhatsApp Flag Translator Ready! React with flag emojis to translate messages.
-              <button onclick="this.parentElement.parentElement.remove()" style="
-                margin-left: 20px;
-                background: white;
-                color: #25d366;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 3px;
-                cursor: pointer;
-                font-weight: bold;
-              ">Close</button>
-            </div>
+          // Clear existing content
+          banner.innerHTML = '';
+          
+          const successContent = document.createElement('div');
+          successContent.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #25d366;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 999999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            font-family: Arial, sans-serif;
           `;
+          
+          const successText = document.createTextNode('🎉 WhatsApp Flag Translator Ready! React with flag emojis to translate messages.');
+          successContent.appendChild(successText);
+          
+          const successCloseButton = document.createElement('button');
+          successCloseButton.textContent = 'Close';
+          successCloseButton.style.cssText = `
+            margin-left: 20px;
+            background: white;
+            color: #25d366;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+          `;
+          
+          // Add event listener instead of inline onclick
+          successCloseButton.addEventListener('click', () => {
+            banner.remove();
+          });
+          
+          successContent.appendChild(successCloseButton);
+          banner.appendChild(successContent);
         }
         
       } else {
@@ -245,9 +271,46 @@ window.testWhatsAppTranslator = function() {
 // FINAL CONFIRMATION
 // =============================================================================
 
-console.log("🎯 Firefox content script setup complete!");
-console.log("💡 To test: Open browser console and run testWhatsAppTranslator()");
-console.log("🔍 Look for the red banner at the top of the page as visual confirmation");
+  console.log("🎯 Firefox content script setup complete!");
+  console.log("💡 To test: Open browser console and run testWhatsAppTranslator()");
+  console.log("🔍 Look for the red banner at the top of the page as visual confirmation");
+  
+  // Add global test functions
+  window.testWhatsAppTranslator = function() {
+    console.log("🧪 Testing WhatsApp Translator...");
+    
+    if (window.whatsappTranslator) {
+      console.log("✅ Translator instance found:", window.whatsappTranslator);
+      
+      // Test flag emoji extraction
+      const testText = "🇯🇵🇩🇪🇫🇷";
+      const flags = testText.match(/[\u{1F1E6}-\u{1F1FF}]{2}/gu) || [];
+      console.log("🏳️ Flag test - Input:", testText, "Flags found:", flags);
+      
+      // Test reaction detection on current page
+      console.log("🔍 Scanning page for reactions...");
+      const reactions = document.querySelectorAll('[data-testid*="reaction"], .message-reaction, [title*="reacted"]');
+      console.log("🎭 Found reactions on page:", reactions.length);
+      reactions.forEach((reaction, i) => {
+        console.log(`  Reaction ${i+1}:`, reaction, "Text:", reaction.textContent);
+      });
+      
+      // Test message containers
+      const messages = document.querySelectorAll('[data-testid="msg-container"]');
+      console.log("💬 Found message containers:", messages.length);
+      
+    } else {
+      console.log("❌ Translator instance not found");
+    }
+  };
+  
+  window.manualReactionTest = function() {
+    console.log("🔧 Manual reaction test...");
+    if (window.whatsappTranslator && window.whatsappTranslator.checkForReactions) {
+      // Test on entire document
+      window.whatsappTranslator.checkForReactions(document.body);
+    }
+  };
 
 // Log every 5 seconds for first minute to confirm script is running
 let logCount = 0;
