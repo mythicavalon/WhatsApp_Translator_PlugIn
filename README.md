@@ -2,7 +2,7 @@
 
 🎯 **Translate WhatsApp messages instantly by reacting with flag emojis**
 
-A clean, reliable Firefox/Chrome browser extension that detects flag emoji reactions on WhatsApp Web messages and displays instant translations using LibreTranslate API with Google Translate fallback.
+A clean, reliable Firefox/Chrome browser extension that detects flag emoji reactions on WhatsApp Web messages and displays instant translations using MyMemory API.
 
 ## ✨ Features
 
