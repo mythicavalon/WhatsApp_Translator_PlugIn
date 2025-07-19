@@ -249,6 +249,81 @@ window.testWhatsAppTranslator = function() {
   };
 };
 
+// Global test functions for debugging
+window.testWhatsAppTranslator = () => {
+  console.log('🧪 Testing WhatsApp Translator...');
+  if (window.whatsappTranslator) {
+    console.log('✅ Translator instance exists');
+    console.log('⚙️ Settings:', window.whatsappTranslator.settings);
+    console.log('🏃‍♂️ Running reaction check...');
+    window.whatsappTranslator.checkForReactions(document.body);
+  } else {
+    console.log('❌ Translator instance not found');
+  }
+};
+
+window.debugReactions = () => {
+  console.log('🔍 Debug: Looking for reaction elements...');
+  const reactionSelectors = [
+    '[data-testid*="reaction"]',
+    '.message-reaction',
+    '[title*="reacted"]',
+    '[aria-label*="reacted"]',
+    '[aria-label*="reaction"]',
+    '[data-testid="reactions"]',
+    '.reactions-container',
+    '[data-testid="emoji-reactions"]',
+    'button[aria-label*="reaction"]',
+    'span[aria-label*="reaction"]',
+    'div[aria-label*="reaction"]'
+  ];
+  
+  reactionSelectors.forEach(selector => {
+    const elements = document.querySelectorAll(selector);
+    if (elements.length > 0) {
+      console.log(`Found ${elements.length} elements with selector: ${selector}`);
+      elements.forEach((el, index) => {
+        console.log(`  ${index + 1}:`, el.tagName, el.getAttribute('aria-label')?.substring(0, 50));
+        // Debug each reaction element
+        if (window.whatsappTranslator) {
+          window.whatsappTranslator.debugReactionElement(el);
+        }
+      });
+    }
+  });
+};
+
+window.forceReactionCheck = () => {
+  console.log('🚀 Force checking all messages for reactions...');
+  if (window.whatsappTranslator) {
+    const messages = document.querySelectorAll('[data-testid="msg-container"]');
+    console.log(`Found ${messages.length} message containers`);
+    messages.forEach((msg, index) => {
+      console.log(`Checking message ${index + 1}...`);
+      window.whatsappTranslator.checkForReactions(msg);
+    });
+  }
+};
+
+window.findAllFlags = () => {
+  console.log('🚩 Finding all flag emojis on the page...');
+  if (window.whatsappTranslator) {
+    return window.whatsappTranslator.findAllFlags();
+  } else {
+    console.log('❌ Translator instance not found');
+    return [];
+  }
+};
+
+window.debugReactionElement = (element) => {
+  console.log('🔍 Debugging specific reaction element...');
+  if (window.whatsappTranslator && element) {
+    return window.whatsappTranslator.debugReactionElement(element);
+  } else {
+    console.log('❌ Translator instance not found or element not provided');
+  }
+};
+
 // =============================================================================
 // FINAL CONFIRMATION
 // =============================================================================

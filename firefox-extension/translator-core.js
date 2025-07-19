@@ -385,15 +385,46 @@ class WhatsAppTranslatorCore {
     try {
       // Find flag emojis in the reaction
       const reactionText = this.getElementText(reactionElement);
-      const flagEmojis = this.extractFlagEmojis(reactionText);
+      let flagEmojis = this.extractFlagEmojis(reactionText);
+      
+      // If no flags found directly, look in the broader context
+      if (flagEmojis.length === 0) {
+        // Check parent containers for flag emojis
+        let currentElement = reactionElement.parentElement;
+        let depth = 0;
+        while (currentElement && depth < 5) {
+          const parentText = this.getElementText(currentElement);
+          const parentFlags = this.extractFlagEmojis(parentText);
+          if (parentFlags.length > 0) {
+            flagEmojis = parentFlags;
+            if (this.settings.debugMode) {
+              this.log('🔍 Found flags in parent element at depth', depth, ':', parentFlags);
+            }
+            break;
+          }
+          currentElement = currentElement.parentElement;
+          depth++;
+        }
+        
+        // If still no flags, look for nearby flag elements
+        if (flagEmojis.length === 0) {
+          const nearbyFlags = this.findNearbyFlags(reactionElement);
+          if (nearbyFlags.length > 0) {
+            flagEmojis = nearbyFlags;
+            if (this.settings.debugMode) {
+              this.log('🔍 Found flags in nearby elements:', nearbyFlags);
+            }
+          }
+        }
+      }
       
       if (this.settings.debugMode) {
-        this.log('🎭 Processing reaction:', reactionText, 'Flags:', flagEmojis);
+        this.log('🎭 Processing reaction:', reactionText.substring(0, 50), 'Flags:', flagEmojis);
       }
       
       if (flagEmojis.length === 0) {
         if (this.settings.debugMode) {
-          this.log('❌ No flag emojis found in reaction');
+          this.log('❌ No flag emojis found in reaction or nearby elements');
         }
         return;
       }
@@ -447,14 +478,50 @@ class WhatsAppTranslatorCore {
   }
 
   getElementText(element) {
-    // First try aria-label for reaction buttons
+    // Comprehensive text extraction for reactions
+    let text = '';
+    
+    // 1. Check aria-label first (most common for reactions)
     const ariaLabel = element.getAttribute('aria-label') || '';
-    if (ariaLabel.includes('reaction')) {
-      return ariaLabel;
+    text += ariaLabel + ' ';
+    
+    // 2. Check title attribute
+    const title = element.getAttribute('title') || '';
+    text += title + ' ';
+    
+    // 3. Check text content
+    text += (element.textContent || element.innerText || '') + ' ';
+    
+    // 4. Check innerHTML for emoji content
+    const innerHTML = element.innerHTML || '';
+    text += innerHTML + ' ';
+    
+    // 5. Check all child elements recursively for flag emojis
+    const children = element.querySelectorAll('*');
+    children.forEach(child => {
+      const childAria = child.getAttribute('aria-label') || '';
+      const childTitle = child.getAttribute('title') || '';
+      const childText = child.textContent || child.innerText || '';
+      text += childAria + ' ' + childTitle + ' ' + childText + ' ';
+    });
+    
+    // 6. If this is a "More reactions" button, look for associated tooltip or popup
+    if (ariaLabel.toLowerCase().includes('more') || title.toLowerCase().includes('more')) {
+      // Look for nearby elements that might contain the actual reactions
+      const parent = element.parentElement;
+      if (parent) {
+        const siblings = parent.querySelectorAll('[aria-label*="🇯🇵"], [aria-label*="🇩🇪"], [aria-label*="🇪🇸"], [aria-label*="🇫🇷"], [aria-label*="🇮🇹"], [aria-label*="🇷🇺"], [aria-label*="🇺🇸"], [aria-label*="🇬🇧"]');
+        siblings.forEach(sibling => {
+          text += (sibling.getAttribute('aria-label') || '') + ' ';
+        });
+      }
     }
     
-    // Fallback to text content
-    return element.textContent || element.innerText || element.innerHTML || '';
+    if (this.settings.debugMode) {
+      this.log('🔤 Extracted text from element:', text.substring(0, 100));
+    }
+    
+    return text;
   }
 
   findMessageContainer(reactionElement) {
@@ -787,5 +854,147 @@ class WhatsAppTranslatorCore {
         errorDiv.remove();
       }
     }, 5000);
+  }
+
+  findNearbyFlags(element) {
+    // Look for flag emojis in nearby elements (siblings, cousins, etc.)
+    const flagEmojis = [];
+    const flagRegex = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
+    
+    // Check siblings
+    if (element.parentElement) {
+      const siblings = element.parentElement.children;
+      for (let sibling of siblings) {
+        const siblingText = this.getElementText(sibling);
+        const siblingFlags = siblingText.match(flagRegex) || [];
+        flagEmojis.push(...siblingFlags);
+      }
+    }
+    
+    // Check nearby elements with flag-related attributes
+    const nearbyFlagElements = document.querySelectorAll('[aria-label*="🇯🇵"], [aria-label*="🇩🇪"], [aria-label*="🇪🇸"], [aria-label*="🇫🇷"], [aria-label*="🇮🇹"], [aria-label*="🇷🇺"], [aria-label*="🇺🇸"], [aria-label*="🇬🇧"]');
+    nearbyFlagElements.forEach(flagEl => {
+      // Only consider if it's reasonably close to our reaction element
+      if (this.isElementNearby(element, flagEl)) {
+        const flagText = this.getElementText(flagEl);
+        const flags = flagText.match(flagRegex) || [];
+        flagEmojis.push(...flags);
+      }
+    });
+    
+    return [...new Set(flagEmojis)]; // Remove duplicates
+  }
+
+  isElementNearby(element1, element2) {
+    // Simple proximity check - elements are nearby if they share a common ancestor within 3 levels
+    let current1 = element1;
+    for (let i = 0; i < 3; i++) {
+      let current2 = element2;
+      for (let j = 0; j < 3; j++) {
+        if (current1 === current2) return true;
+        current2 = current2.parentElement;
+        if (!current2) break;
+      }
+      current1 = current1.parentElement;
+      if (!current1) break;
+    }
+    return false;
+  }
+
+  // Debug function to find all flag emojis on the page
+  findAllFlags() {
+    console.log('🔍 Scanning entire page for flag emojis...');
+    const flagRegex = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
+    const allElements = document.querySelectorAll('*');
+    const flagElements = [];
+    
+    allElements.forEach(element => {
+      // Check aria-label
+      const ariaLabel = element.getAttribute('aria-label') || '';
+      if (flagRegex.test(ariaLabel)) {
+        flagElements.push({
+          element,
+          location: 'aria-label',
+          content: ariaLabel,
+          flags: ariaLabel.match(flagRegex)
+        });
+      }
+      
+      // Check title
+      const title = element.getAttribute('title') || '';
+      if (flagRegex.test(title)) {
+        flagElements.push({
+          element,
+          location: 'title',
+          content: title,
+          flags: title.match(flagRegex)
+        });
+      }
+      
+      // Check text content (only direct text, not inherited)
+      const directText = Array.from(element.childNodes)
+        .filter(node => node.nodeType === Node.TEXT_NODE)
+        .map(node => node.textContent)
+        .join(' ');
+      if (flagRegex.test(directText)) {
+        flagElements.push({
+          element,
+          location: 'text',
+          content: directText,
+          flags: directText.match(flagRegex)
+        });
+      }
+    });
+    
+    console.log(`🚩 Found ${flagElements.length} elements with flag emojis:`);
+    flagElements.forEach((item, index) => {
+      console.log(`${index + 1}. ${item.element.tagName} (${item.location}): ${item.content.substring(0, 50)} - Flags: ${item.flags.join(', ')}`);
+      console.log('   Element:', item.element);
+      console.log('   Classes:', item.element.className);
+      console.log('   Parent:', item.element.parentElement?.tagName, item.element.parentElement?.className);
+    });
+    
+    return flagElements;
+  }
+
+  // Debug function to analyze a specific reaction element
+  debugReactionElement(element) {
+    console.log('🔍 Debugging reaction element:', element);
+    console.log('📝 Element details:');
+    console.log('   Tag:', element.tagName);
+    console.log('   Classes:', element.className);
+    console.log('   aria-label:', element.getAttribute('aria-label'));
+    console.log('   title:', element.getAttribute('title'));
+    console.log('   data-testid:', element.getAttribute('data-testid'));
+    console.log('   textContent:', element.textContent?.substring(0, 100));
+    
+    console.log('🔤 Extracted text:', this.getElementText(element).substring(0, 100));
+    console.log('🚩 Extracted flags:', this.extractFlagEmojis(this.getElementText(element)));
+    
+    console.log('👨‍👩‍👧‍👦 Parent elements:');
+    let parent = element.parentElement;
+    let depth = 0;
+    while (parent && depth < 5) {
+      console.log(`   Parent ${depth}:`, parent.tagName, parent.className?.substring(0, 30));
+      console.log(`   Parent ${depth} aria-label:`, parent.getAttribute('aria-label')?.substring(0, 50));
+      const parentFlags = this.extractFlagEmojis(this.getElementText(parent));
+      if (parentFlags.length > 0) {
+        console.log(`   🚩 Parent ${depth} has flags:`, parentFlags);
+      }
+      parent = parent.parentElement;
+      depth++;
+    }
+    
+    console.log('👫 Sibling elements:');
+    if (element.parentElement) {
+      Array.from(element.parentElement.children).forEach((sibling, index) => {
+        if (sibling !== element) {
+          const siblingFlags = this.extractFlagEmojis(this.getElementText(sibling));
+          if (siblingFlags.length > 0) {
+            console.log(`   Sibling ${index}:`, sibling.tagName, 'Flags:', siblingFlags);
+          }
+        }
+      });
+    }
   }
 }
