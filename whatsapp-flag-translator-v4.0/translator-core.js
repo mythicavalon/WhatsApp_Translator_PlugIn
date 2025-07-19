@@ -35,11 +35,18 @@ class WhatsAppTranslatorCore {
     this.reactionObserver = null;
     this.isInitialized = false;
     
-    // Enhanced LibreTranslate instances for v4.0 (tested and working)
+    // Enhanced translation APIs for v4.0.1 (multiple free services)
     this.libreTranslateInstances = [
       'https://libretranslate.de',
       'https://translate.terraprint.co',
       'https://libretranslate.com'
+    ];
+    
+    // Additional free translation APIs
+    this.freeTranslationAPIs = [
+      'https://api.mymemory.translated.net',  // MyMemory - 1000 chars/day free
+      'https://translate.yandex.net',          // Yandex - good for many languages
+      'https://api.cognitive.microsofttranslator.com' // Microsoft - free tier
     ];
   }
 
@@ -627,15 +634,57 @@ class WhatsAppTranslatorCore {
         await new Promise(resolve => setTimeout(resolve, 1000));
         return this.translateWithLibreTranslate(text, targetLanguage, instanceIndex + 1);
              } else {
-         // Try Google Translate as final fallback
+         // Try alternative free APIs before Google fallback
          try {
-           return await this.translateWithGoogleFallback(text, targetLanguage);
-         } catch (googleError) {
-           // Final fallback: show a demo translation to prove the extension works
-           this.logImportant('🎭 Using demo translation as final fallback');
-           return `[DEMO] Translation to ${targetLanguage}: "${text}"`;
+           return await this.translateWithMyMemory(text, targetLanguage);
+         } catch (myMemoryError) {
+           try {
+             return await this.translateWithGoogleFallback(text, targetLanguage);
+           } catch (googleError) {
+             // Final fallback: show a demo translation to prove the extension works
+             this.logImportant('🎭 Using demo translation as final fallback');
+             return `[DEMO] Translation to ${targetLanguage}: "${text}"`;
+           }
          }
        }
+    }
+  }
+
+  async translateWithMyMemory(text, targetLanguage) {
+    this.logImportant('🔄 Trying MyMemory API (completely free)...');
+    
+    try {
+      const baseLanguage = targetLanguage.split('-')[0];
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=auto|${baseLanguage}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'WhatsApp-Flag-Translator/4.0.1'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`MyMemory HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.responseData && data.responseData.translatedText) {
+        const translation = data.responseData.translatedText;
+        // Check if it's actually translated (MyMemory returns original text if can't translate)
+        if (translation.toLowerCase() !== text.toLowerCase()) {
+          this.logImportant('✅ MyMemory API successful');
+          return translation;
+        } else {
+          throw new Error('MyMemory returned same text - no translation available');
+        }
+      } else {
+        throw new Error('Invalid MyMemory response format');
+      }
+    } catch (error) {
+      this.logImportant('❌ MyMemory API failed:', error.message);
+      throw error;
     }
   }
 
