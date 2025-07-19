@@ -367,6 +367,35 @@ window.testWhatsAppTranslator = function() {
     }
   };
 
+  // Find all elements containing flag emojis on the page
+  window.findAllFlags = function() {
+    console.log('🚩 Scanning entire page for flag emojis...');
+    const flagRegex = /[\u{1F1E6}-\u{1F1FF}]{2}/u;
+    const allElements = document.querySelectorAll('*');
+    const flagElements = [];
+    
+    allElements.forEach(el => {
+      const ariaLabel = el.getAttribute('aria-label') || '';
+      const title = el.getAttribute('title') || '';
+      const text = el.textContent || '';
+      
+      if (flagRegex.test(ariaLabel) || flagRegex.test(title) || flagRegex.test(text)) {
+        flagElements.push({
+          element: el,
+          tagName: el.tagName,
+          className: el.className,
+          ariaLabel,
+          title,
+          text: text.substring(0, 30),
+          innerHTML: el.innerHTML.substring(0, 100)
+        });
+      }
+    });
+    
+    console.log(`🚩 Found ${flagElements.length} elements with flag emojis:`, flagElements);
+    return flagElements;
+  };
+
 // Minimal heartbeat - only log twice to confirm it's working
 let logCount = 0;
 const intervalId = setInterval(() => {
