@@ -13,7 +13,7 @@ class WhatsAppTranslatorCore {
       showFlag: true,
       compressText: true,
       cacheTranslations: true,
-      debugMode: false
+      debugMode: false // Keep disabled for performance on older machines
     };
     
     this.flagToLanguage = {
@@ -156,27 +156,63 @@ class WhatsAppTranslatorCore {
 
 
   setupMutationObserver() {
-    console.log('🔧 Setting up mutation observer...');
+    this.log('🔧 Setting up optimized mutation observer...');
+    
+    // Throttle mutation processing to prevent lag
+    let processingTimeout;
+    const throttleDelay = 500; // Process mutations every 500ms max
     
     this.observer = new MutationObserver((mutations) => {
-      console.log(`👀 Mutation observer triggered with ${mutations.length} mutations`);
+      // Clear previous timeout
+      if (processingTimeout) {
+        clearTimeout(processingTimeout);
+      }
       
-      mutations.forEach((mutation) => {
-        console.log('🔄 Processing mutation:', mutation.type, mutation);
-        
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              console.log('➕ New element added:', node);
-              this.checkForReactions(node);
-            }
-          });
-        }
-      });
+      // Throttle processing to prevent overwhelming the browser
+      processingTimeout = setTimeout(() => {
+        this.processMutationsBatch(mutations);
+      }, throttleDelay);
     });
 
     // Start observing when the chat container is available
     this.waitForChatContainer();
+  }
+
+  processMutationsBatch(mutations) {
+    // Only log if debug mode is enabled
+    if (this.settings.debugMode) {
+      this.log(`👀 Processing ${mutations.length} mutations (batched)`);
+    }
+    
+    // Collect all new elements in one pass
+    const newElements = [];
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            newElements.push(node);
+          }
+        });
+      }
+    });
+    
+    // Process elements in batches to prevent lag
+    if (newElements.length > 0) {
+      this.processElementsBatch(newElements);
+    }
+  }
+
+  processElementsBatch(elements) {
+    // Process only the most recent elements to avoid lag
+    const maxElements = 5; // Limit processing to prevent overwhelming
+    const elementsToProcess = elements.slice(-maxElements);
+    
+    elementsToProcess.forEach((element, index) => {
+      // Add small delay between processing to prevent lag
+      setTimeout(() => {
+        this.checkForReactions(element);
+      }, index * 50); // 50ms delay between each element
+    });
   }
 
   waitForChatContainer() {
@@ -235,11 +271,10 @@ class WhatsAppTranslatorCore {
   }
 
   checkForReactions(element) {
-    console.log('🔍 Checking for reactions in element:', element);
-    console.log('🔍 Element classes:', element.className);
-    console.log('🔍 Element data-testid:', element.getAttribute ? element.getAttribute('data-testid') : 'N/A');
-    console.log('🔍 Element aria-label:', element.getAttribute ? element.getAttribute('aria-label') : 'N/A');
-    console.log('🔍 Element tag name:', element.tagName);
+    // Only log detailed info if debug mode is enabled
+    if (this.settings.debugMode) {
+      this.log('🔍 Checking for reactions in element:', element.tagName, element.className?.substring(0, 50));
+    }
     
     // Multiple strategies to find reactions
     const reactionSelectors = [
@@ -270,45 +305,49 @@ class WhatsAppTranslatorCore {
       reactions.push(element);
     }
     
-    // Search within the element
+    // Search within the element (optimized)
     reactionSelectors.forEach(selector => {
       try {
         const found = element.querySelectorAll ? element.querySelectorAll(selector) : [];
         if (found.length > 0) {
-          console.log(`🎯 Found ${found.length} reactions with selector: ${selector}`);
-          console.log('🎯 Reaction elements:', Array.from(found));
+          if (this.settings.debugMode) {
+            this.log(`🎯 Found ${found.length} reactions with selector: ${selector}`);
+          }
+          reactions.push(...found);
         }
-        reactions.push(...found);
       } catch (e) {
-        console.log('❌ Error with selector:', selector, e);
+        if (this.settings.debugMode) {
+          this.log('❌ Error with selector:', selector, e.message);
+        }
       }
     });
     
-    // Additional debug: check all buttons and spans for flag emojis
-    const allButtons = element.querySelectorAll ? element.querySelectorAll('button, span, div') : [];
-    allButtons.forEach((el, index) => {
-      const ariaLabel = el.getAttribute('aria-label') || '';
-      const title = el.getAttribute('title') || '';
-      const text = el.textContent || '';
-      
-      // Check for flag emojis in any text content
+    // Optimized flag emoji detection - only check if no reactions found yet
+    if (reactions.length === 0) {
       const flagRegex = /[\u{1F1E6}-\u{1F1FF}]{2}/u;
-      if (flagRegex.test(ariaLabel) || flagRegex.test(title) || flagRegex.test(text)) {
-        console.log(`🚩 Found potential flag element ${index}:`, el);
-        console.log(`🚩 Aria-label: "${ariaLabel}"`);
-        console.log(`🚩 Title: "${title}"`);
-        console.log(`🚩 Text: "${text}"`);
-        if (!reactions.includes(el)) {
+      const potentialElements = element.querySelectorAll ? 
+        element.querySelectorAll('button[aria-label*="🇯🇵"], button[aria-label*="🇩🇪"], span[aria-label*="🇯🇵"], span[aria-label*="🇩🇪"]') : [];
+      
+      Array.from(potentialElements).forEach((el) => {
+        const ariaLabel = el.getAttribute('aria-label') || '';
+        if (flagRegex.test(ariaLabel)) {
+          if (this.settings.debugMode) {
+            this.log(`🚩 Found flag element: ${ariaLabel}`);
+          }
           reactions.push(el);
         }
-      }
-    });
+      });
+    }
     
-    console.log(`📊 Total reactions found: ${reactions.length}`);
+    if (this.settings.debugMode && reactions.length > 0) {
+      this.log(`📊 Total reactions found: ${reactions.length}`);
+    }
     
     // Process each reaction found
     reactions.forEach(reaction => {
-      console.log('🔄 Processing reaction:', reaction);
+      if (this.settings.debugMode) {
+        this.log('🔄 Processing reaction:', reaction.tagName);
+      }
       this.processReaction(reaction);
     });
   }
@@ -332,47 +371,55 @@ class WhatsAppTranslatorCore {
 
   processReaction(reactionElement) {
     try {
-      console.log('🎭 Processing reaction element:', reactionElement);
-      
       // Find flag emojis in the reaction
       const reactionText = this.getElementText(reactionElement);
-      console.log('📝 Reaction text:', reactionText);
-      
       const flagEmojis = this.extractFlagEmojis(reactionText);
-      console.log('🏳️ Flag emojis found:', flagEmojis);
+      
+      if (this.settings.debugMode) {
+        this.log('🎭 Processing reaction:', reactionText, 'Flags:', flagEmojis);
+      }
       
       if (flagEmojis.length === 0) {
-        console.log('❌ No flag emojis found in reaction');
+        if (this.settings.debugMode) {
+          this.log('❌ No flag emojis found in reaction');
+        }
         return;
       }
 
       // Find the associated message with multiple strategies
       const messageContainer = this.findMessageContainer(reactionElement);
-      console.log('📦 Message container found:', messageContainer);
       
       if (!messageContainer) {
-        console.log('❌ No message container found');
+        if (this.settings.debugMode) {
+          this.log('❌ No message container found');
+        }
         return;
       }
 
       // Extract message text
       const messageText = this.extractMessageText(messageContainer);
-      console.log('💬 Message text extracted:', messageText);
+      
+      if (this.settings.debugMode) {
+        this.log('💬 Message text:', messageText?.substring(0, 50) + '...');
+      }
       
       if (!messageText || messageText.length < 2) {
-        console.log('❌ No valid message text found');
+        if (this.settings.debugMode) {
+          this.log('❌ No valid message text found');
+        }
         return;
       }
 
       // Get unique message ID
       const messageId = this.getMessageId(messageContainer);
-      console.log('🆔 Message ID:', messageId);
       
-      this.log('🎯 Flag reaction detected!', {
-        flags: flagEmojis,
-        messagePreview: messageText.substring(0, 50) + '...',
-        messageId: messageId
-      });
+      if (this.settings.debugMode) {
+        this.log('🎯 Flag reaction detected!', {
+          flags: flagEmojis,
+          messagePreview: messageText.substring(0, 30) + '...',
+          messageId: messageId?.substring(0, 10) + '...'
+        });
+      }
       
       // Process each flag emoji
       flagEmojis.forEach(flagEmoji => {
@@ -526,18 +573,25 @@ class WhatsAppTranslatorCore {
     let lastError;
     for (const instance of instances) {
       try {
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
         const response = await fetch(instance, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            q: text,
+            q: text.substring(0, 500), // Limit text length to prevent overload
             source: 'auto',
             target: targetLang,
             format: 'text'
-          })
+          }),
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           throw new Error(`LibreTranslate API error: ${response.status}`);
@@ -546,7 +600,9 @@ class WhatsAppTranslatorCore {
         const data = await response.json();
         return data.translatedText;
       } catch (error) {
-        console.log(`Failed to translate with ${instance}:`, error);
+        if (this.settings.debugMode) {
+          this.log(`Failed to translate with ${instance}:`, error.message);
+        }
         lastError = error;
         continue; // Try next instance
       }

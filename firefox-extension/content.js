@@ -8,12 +8,7 @@
 // =============================================================================
 
 // IMMEDIATE LOGGING - This should appear first
-console.log("✅ Extension Loaded");
-console.log("🔥 FIREFOX EXTENSION CONTENT SCRIPT INJECTED!");
-console.log("📍 Current URL:", document.location.href);
-console.log("📍 Document title:", document.title);
-console.log("📍 Document ready state:", document.readyState);
-console.log("📍 User agent:", navigator.userAgent);
+console.log("✅ WhatsApp Flag Translator - Extension Loaded");
 
 // Add to window for debugging
 window.WHATSAPP_TRANSLATOR_LOADED = true;
@@ -360,14 +355,15 @@ window.testWhatsAppTranslator = function() {
     };
   };
 
-// Log every 5 seconds for first minute to confirm script is running
+// Minimal heartbeat - only log twice to confirm it's working
 let logCount = 0;
 const intervalId = setInterval(() => {
   logCount++;
-  console.log(`⏰ Extension heartbeat ${logCount} - Script is running`);
+  if (logCount <= 2) {
+    console.log(`⏰ Extension heartbeat ${logCount} - Script is running`);
+  }
   
-  if (logCount >= 12) { // Stop after 1 minute
+  if (logCount >= 2) { // Stop after 10 seconds
     clearInterval(intervalId);
-    console.log("🔇 Heartbeat logging stopped");
   }
 }, 5000);
