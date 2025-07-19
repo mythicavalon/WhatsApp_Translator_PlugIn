@@ -1,4 +1,4 @@
-# WhatsApp Flag Translator v4.0.1
+# WhatsApp Flag Translator v4.0.2
 
 🎯 **Translate WhatsApp messages instantly by reacting with flag emojis**
 
@@ -17,7 +17,7 @@ A clean, reliable Firefox/Chrome browser extension that detects flag emoji react
 ## 🚀 Quick Start
 
 ### Installation
-1. **Download** `whatsapp-flag-translator-v4.0.1.zip`
+1. **Download** `whatsapp-flag-translator-v4.0.2.zip`
 2. **Extract** the ZIP file
 3. **Open Firefox** → `about:debugging` → "This Firefox"
 4. **Click** "Load Temporary Add-on"
@@ -62,17 +62,23 @@ restartTranslator()
 
 ### Files
 - `whatsapp-flag-translator-v4.0/` - Source code folder
-- `whatsapp-flag-translator-v4.0.1.zip` - Ready-to-install extension
+- `whatsapp-flag-translator-v4.0.2.zip` - Ready-to-install extension
 
-## 🎉 What's New in v4.0.1
+## 🎉 What's New in v4.0.2
 
-### 🛠️ API Fixes
-- **Fixed LibreTranslate errors** - Resolved 400 Bad Request issues
-- **Enhanced Google Translate** - Multiple endpoints for better reliability
-- **Demo fallback** - Always shows something working even if APIs fail
-- **Improved error handling** - Better user experience during API failures
+### 🌐 **NEW: MyMemory API Integration**
+- **Completely FREE** - No signup, no credit card required
+- **1000 characters/day** - Plenty for personal use
+- **High reliability** - Professional translation service
+- **Better success rate** - Much more reliable than LibreTranslate instances
 
-### 🏗️ Clean Architecture
+### 🔄 **Enhanced Translation Chain**
+- **LibreTranslate** (3 instances) → **MyMemory API** → **Google Translate** → **Demo fallback**
+- **Higher success rate** - Real translations instead of demo messages
+- **Better error handling** - Graceful fallbacks between services
+- **No CORS issues** - MyMemory designed for web applications
+
+### 🏗️ **Clean Architecture (v4.0+)**
 - **Fresh codebase** - Complete rewrite with best practices
 - **Modular design** - Clear separation of concerns
 - **Enhanced debugging** - Comprehensive logging and debug functions
