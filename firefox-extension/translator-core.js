@@ -252,9 +252,12 @@ class WhatsAppTranslatorCore {
       '.message-reaction',
       '[title*="reacted"]',
       '[aria-label*="reacted"]',
+      '[aria-label*="reaction"]',  // NEW: For "reaction 🇯🇵" pattern
       '[data-testid="reactions"]',
       '.reactions-container',
-      '[data-testid="emoji-reactions"]'
+      '[data-testid="emoji-reactions"]',
+      'button[aria-label*="reaction"]',  // NEW: Button elements with reaction aria-label
+      'button.xo0jvv6[aria-label*="reaction"]'  // NEW: Specific button class we see in logs
     ];
     
     let reactions = [];
@@ -291,10 +294,13 @@ class WhatsAppTranslatorCore {
     const title = element.getAttribute('title') || '';
     const ariaLabel = element.getAttribute('aria-label') || '';
     
+    // Check for current WhatsApp reaction patterns
     return testId.includes('reaction') ||
            className.includes('reaction') ||
            title.includes('reacted') ||
-           ariaLabel.includes('reacted');
+           ariaLabel.includes('reacted') ||
+           ariaLabel.includes('reaction') ||  // NEW: Check for "reaction 🇯🇵" pattern
+           (element.tagName === 'BUTTON' && ariaLabel.match(/reaction\s+[\u{1F1E6}-\u{1F1FF}]{2}/u)); // NEW: Button with flag
   }
 
   processReaction(reactionElement) {
@@ -355,6 +361,13 @@ class WhatsAppTranslatorCore {
   }
 
   getElementText(element) {
+    // First try aria-label for reaction buttons
+    const ariaLabel = element.getAttribute('aria-label') || '';
+    if (ariaLabel.includes('reaction')) {
+      return ariaLabel;
+    }
+    
+    // Fallback to text content
     return element.textContent || element.innerText || element.innerHTML || '';
   }
 
