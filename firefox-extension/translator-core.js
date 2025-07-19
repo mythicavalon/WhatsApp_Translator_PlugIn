@@ -203,8 +203,17 @@ class WhatsAppTranslatorCore {
         this.logImportant('🔍 Looking for WhatsApp chat container...');
       }
       
-      // Simple, reliable chat container detection
-      let chatContainer = document.querySelector('#main');
+              // Try multiple selectors since WhatsApp structure changes
+        const selectors = ['#main', '#app', '[data-testid="conversation-panel-messages"]', '[role="main"]'];
+        let chatContainer = null;
+        
+        for (const selector of selectors) {
+          chatContainer = document.querySelector(selector);
+          if (chatContainer) {
+            this.logImportant(`✅ Found chat container using selector: ${selector}`);
+            break;
+          }
+        }
       
       // Log what we found for debugging
       if (chatContainer) {
