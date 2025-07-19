@@ -121,25 +121,7 @@ console.log("📱 Is WhatsApp Web:", isWhatsAppWeb);
 if (isWhatsAppWeb) {
   console.log("✅ On WhatsApp Web - proceeding with translator initialization");
   
-  // Load translator core dynamically
-  function loadTranslatorCore() {
-    console.log("🔄 Loading translator core...");
-    
-    // Create script element to load translator-core.js
-    const script = document.createElement('script');
-    script.src = browser.runtime.getURL('translator-core.js');
-    script.onload = () => {
-      console.log("✅ Translator core loaded successfully");
-      initializeTranslator();
-    };
-    script.onerror = (error) => {
-      console.error("❌ Failed to load translator core:", error);
-      // Fallback - try to initialize anyway
-      setTimeout(initializeTranslator, 1000);
-    };
-    
-    (document.head || document.documentElement).appendChild(script);
-  }
+  // Translator core is now loaded directly via manifest
   
   // Initialize the translator
   function initializeTranslator() {
@@ -226,11 +208,11 @@ if (isWhatsAppWeb) {
     }
   }
   
-  // Start loading process
+  // Start initialization process
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadTranslatorCore);
+    document.addEventListener('DOMContentLoaded', initializeTranslator);
   } else {
-    loadTranslatorCore();
+    initializeTranslator();
   }
   
 } else {
