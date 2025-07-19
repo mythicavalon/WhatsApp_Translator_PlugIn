@@ -14,7 +14,8 @@ class WhatsAppTranslatorCore {
       showFlag: true,
       compressText: true,
       cacheTranslations: true,
-      debugMode: false
+      debugMode: false,
+      translationService: 'libretranslate' // 'libretranslate' or 'deepl'
     };
     
     this.flagToLanguage = {
@@ -484,8 +485,9 @@ class WhatsAppTranslatorCore {
       return;
     }
 
-    if (!this.deepLApiKey) {
-      this.showError(messageContainer, 'API key not configured. Please set up your DeepL API key in the extension popup.');
+    // Check if API key is needed (only for DeepL)
+    if (this.settings.translationService === 'deepl' && !this.deepLApiKey) {
+      this.showError(messageContainer, 'DeepL API key not configured. Please set up your DeepL API key in the extension popup or switch to LibreTranslate (free) in settings.');
       return;
     }
 
@@ -497,7 +499,7 @@ class WhatsAppTranslatorCore {
         textToTranslate = this.compressText(messageText);
       }
 
-      const translation = await this.callDeepLAPI(textToTranslate, targetLanguage);
+      const translation = await this.callTranslationAPI(textToTranslate, targetLanguage);
       
       // Cache the translation if enabled
       if (this.settings.cacheTranslations) {
@@ -508,6 +510,14 @@ class WhatsAppTranslatorCore {
     } catch (error) {
       console.error('Translation error:', error);
       this.showError(messageContainer, `Translation failed: ${error.message}`);
+    }
+  }
+
+  async callTranslationAPI(text, targetLanguage) {
+    if (this.settings.translationService === 'deepl') {
+      return await this.callDeepLAPI(text, targetLanguage);
+    } else {
+      return await this.callLibreTranslateAPI(text, targetLanguage);
     }
   }
 
@@ -530,6 +540,60 @@ class WhatsAppTranslatorCore {
 
     const data = await response.json();
     return data.translations[0].text;
+  }
+
+  async callLibreTranslateAPI(text, targetLanguage) {
+    // Convert flag language codes to LibreTranslate format
+    const langMap = {
+      'en-US': 'en', 'en-GB': 'en', 'es': 'es', 'fr': 'fr', 'de': 'de',
+      'it': 'it', 'pt': 'pt', 'pt-BR': 'pt', 'ru': 'ru', 'ja': 'ja', 
+      'ko': 'ko', 'zh': 'zh', 'nl': 'nl', 'sv': 'sv', 'no': 'no', 
+      'da': 'da', 'fi': 'fi', 'pl': 'pl', 'cs': 'cs', 'sk': 'sk', 
+      'hu': 'hu', 'el': 'el', 'tr': 'tr', 'hi': 'hi', 'th': 'th', 
+      'vi': 'vi', 'id': 'id', 'ms': 'ms', 'tl': 'tl', 'ar': 'ar', 
+      'he': 'he', 'uk': 'uk', 'ro': 'ro', 'bg': 'bg', 'hr': 'hr', 
+      'sl': 'sl', 'lt': 'lt', 'lv': 'lv', 'et': 'et'
+    };
+
+    const targetLang = langMap[targetLanguage] || targetLanguage.split('-')[0];
+
+    // Try multiple LibreTranslate instances for reliability
+    const instances = [
+      'https://libretranslate.de/translate',
+      'https://translate.terraprint.co/translate',
+      'https://libretranslate.com/translate'
+    ];
+
+    let lastError;
+    for (const instance of instances) {
+      try {
+        const response = await fetch(instance, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            q: text,
+            source: 'auto',
+            target: targetLang,
+            format: 'text'
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`LibreTranslate API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.translatedText;
+      } catch (error) {
+        console.log(`Failed to translate with ${instance}:`, error);
+        lastError = error;
+        continue; // Try next instance
+      }
+    }
+
+    throw new Error(`All LibreTranslate instances failed. Last error: ${lastError.message}`);
   }
 
   compressText(text) {
