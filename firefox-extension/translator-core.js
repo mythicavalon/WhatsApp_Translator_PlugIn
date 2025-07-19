@@ -13,7 +13,7 @@ class WhatsAppTranslatorCore {
       showFlag: true,
       compressText: true,
       cacheTranslations: true,
-      debugMode: false // Keep disabled for performance on older machines
+      debugMode: true // Temporarily enable to diagnose reaction detection
     };
     
     this.flagToLanguage = {
@@ -176,6 +176,9 @@ class WhatsAppTranslatorCore {
 
     // Start observing when the chat container is available
     this.waitForChatContainer();
+    
+    // Add immediate debug logging
+    console.log('🔧 Mutation observer setup completed');
   }
 
   processMutationsBatch(mutations) {
@@ -228,7 +231,8 @@ class WhatsAppTranslatorCore {
           childList: true,
           subtree: true
         });
-        this.log('👀 Started observing chat container:', chatContainer.tagName);
+        console.log('👀 Started observing chat container:', chatContainer.tagName, chatContainer);
+        console.log('🎯 Mutation observer is now active and waiting for reactions!');
         
         // Also check existing messages for reactions
         this.scanExistingMessages(chatContainer);

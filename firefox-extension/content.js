@@ -355,6 +355,18 @@ window.testWhatsAppTranslator = function() {
     };
   };
 
+  // Force reaction check function
+  window.forceReactionCheck = function() {
+    console.log('🔧 Force checking entire page for reactions...');
+    if (window.whatsappTranslator && window.whatsappTranslator.checkForReactions) {
+      // Check the entire document
+      window.whatsappTranslator.checkForReactions(document.body);
+      console.log('✅ Force reaction check completed');
+    } else {
+      console.log('❌ Translator not found');
+    }
+  };
+
 // Minimal heartbeat - only log twice to confirm it's working
 let logCount = 0;
 const intervalId = setInterval(() => {
