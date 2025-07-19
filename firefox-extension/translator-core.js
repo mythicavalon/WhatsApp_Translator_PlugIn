@@ -38,22 +38,22 @@ class WhatsAppTranslatorCore {
   async init() {
     if (this.isInitialized) return;
     
-    this.log('🔧 Starting WhatsApp Flag Translator initialization...');
+    this.logImportant('🔧 Starting WhatsApp Flag Translator initialization...');
     try {
       await this.loadSettings();
-      this.log('✅ Configuration loaded');
+      this.logImportant('✅ Configuration loaded');
       
       this.setupMutationObserver();
-      this.log('✅ Mutation observer setup');
+      this.logImportant('✅ Mutation observer setup');
       
       this.setupMessageObserver();
-      this.log('✅ Message observer setup');
+      this.logImportant('✅ Message observer setup');
       
       this.setupMessageListener();
-      this.log('✅ Message listener setup');
+      this.logImportant('✅ Message listener setup');
       
       this.isInitialized = true;
-      this.log('🎉 WhatsApp Flag Translator fully initialized and ready!');
+      this.logImportant('🎉 WhatsApp Flag Translator fully initialized and ready!');
       
       // Add visual confirmation if debug mode is enabled
       if (this.settings.debugMode) {
@@ -108,6 +108,11 @@ class WhatsAppTranslatorCore {
     if (this.settings.debugMode) {
       console.log(message, ...args);
     }
+  }
+
+  // Always log important messages regardless of debug mode
+  logImportant(message, ...args) {
+    console.log(message, ...args);
   }
 
   showInitializationMessage() {
@@ -184,7 +189,7 @@ class WhatsAppTranslatorCore {
   processMutationsBatch(mutations) {
     // Only log if debug mode is enabled
     if (this.settings.debugMode) {
-      this.log(`👀 Processing ${mutations.length} mutations (batched)`);
+      this.logImportant(`👀 Processing ${mutations.length} mutations (batched)`);
     }
     
     // Collect all new elements in one pass
@@ -219,28 +224,52 @@ class WhatsAppTranslatorCore {
   }
 
   waitForChatContainer() {
+    let retryCount = 0;
+    const maxRetries = 10; // Limit retries to prevent infinite loop
+    
     const checkForContainer = () => {
-      this.log('🔍 Looking for WhatsApp chat container...');
-      const chatContainer = document.querySelector('[data-testid="conversation-panel-messages"]') ||
-                           document.querySelector('#main') ||
-                           document.querySelector('[role="main"]') ||
-                           document.querySelector('[data-testid="chat"]');
+      retryCount++;
+      
+      if (retryCount === 1) {
+        this.logImportant('🔍 Looking for WhatsApp chat container...');
+      }
+      
+      // Try multiple selectors for WhatsApp chat container
+      const selectors = [
+        '[data-testid="conversation-panel-messages"]',
+        '#main',
+        '[role="main"]',
+        '[data-testid="chat"]',
+        '.app-wrapper-web #main',
+        '#app #main'
+      ];
+      
+      let chatContainer = null;
+      for (const selector of selectors) {
+        chatContainer = document.querySelector(selector);
+        if (chatContainer) break;
+      }
       
       if (chatContainer) {
         this.observer.observe(chatContainer, {
           childList: true,
           subtree: true
         });
-        console.log('👀 Started observing chat container:', chatContainer.tagName, chatContainer);
-        console.log('🎯 Mutation observer is now active and waiting for reactions!');
+        this.logImportant('👀 Started observing chat container:', chatContainer.tagName);
+        this.logImportant('🎯 Mutation observer is now active and waiting for reactions!');
         
         // Also check existing messages for reactions
         this.scanExistingMessages(chatContainer);
+      } else if (retryCount < maxRetries) {
+        if (retryCount <= 3) {
+          this.logImportant(`⏳ Chat container not found (attempt ${retryCount}), retrying...`);
+        }
+        setTimeout(checkForContainer, 2000); // Increased delay to reduce spam
       } else {
-        this.log('⏳ Chat container not found, retrying in 1 second...');
-        setTimeout(checkForContainer, 1000);
+        this.logImportant('❌ Failed to find chat container after 10 attempts. Extension may not work properly.');
       }
     };
+    
     checkForContainer();
   }
 
