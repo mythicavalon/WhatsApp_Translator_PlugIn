@@ -1,0 +1,334 @@
+/**
+ * WhatsApp Flag Translator - Enhanced Styles
+ * Configurable bubble sizes and improved animations
+ */
+
+.flag-translation {
+  margin: 6px 0 4px 0;
+  padding: 8px 12px;
+  background: #e7f3ff;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px; /* Base size - will be scaled by settings */
+  line-height: 1.4;
+  animation: slideInUp 0.3s ease-out;
+  position: relative;
+  max-width: 85%;
+  word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border: 1px solid #d1e7dd;
+  opacity: 0.95;
+  transform-origin: left top;
+  transition: all 0.3s ease;
+}
+
+/* Enhanced animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 0.95;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from { 
+    transform: translateX(100%); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateX(0); 
+    opacity: 1; 
+  }
+}
+
+.flag-translation.fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Loading state */
+.flag-translation.loading {
+  background: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.flag-translation.loading .translation-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  background: #25d366;
+  border-radius: 50%;
+  animation: loadingPulse 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+.loading-dots span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes loadingPulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Error state */
+.flag-translation.error {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.flag-translation.error .flag-translation-header {
+  color: #721c24;
+}
+
+/* Dark mode support - Enhanced */
+[data-theme="dark"] .flag-translation,
+.dark .flag-translation,
+body.dark .flag-translation {
+  background: #2a3942;
+  color: #e9edef;
+  border-color: #3b4a54;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .flag-translation.loading,
+.dark .flag-translation.loading,
+body.dark .flag-translation.loading {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .flag-translation.error,
+.dark .flag-translation.error,
+body.dark .flag-translation.error {
+  background: #991b1b;
+  border-color: #dc2626;
+  color: #fef2f2;
+}
+
+/* Header styling */
+.flag-translation-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 10px;
+  color: #667781;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .flag-translation-header,
+.dark .flag-translation-header,
+body.dark .flag-translation-header {
+  color: #8696a0;
+}
+
+.flag-emoji {
+  font-size: 14px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.translation-status {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 9px;
+}
+
+/* Enhanced close button */
+.close-translation {
+  background: none;
+  border: none;
+  color: #667781;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.close-translation:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #000;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.close-translation:active {
+  transform: scale(0.95);
+}
+
+[data-theme="dark"] .close-translation,
+.dark .close-translation,
+body.dark .close-translation {
+  color: #8696a0;
+}
+
+[data-theme="dark"] .close-translation:hover,
+.dark .close-translation:hover,
+body.dark .close-translation:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* Content styling */
+.translation-content {
+  color: #111b21;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+  word-break: break-word;
+}
+
+[data-theme="dark"] .translation-content,
+.dark .translation-content,
+body.dark .translation-content {
+  color: #e9edef;
+}
+
+/* Responsive scaling for different bubble sizes */
+.flag-translation[style*="font-size: 80%"] {
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.flag-translation[style*="font-size: 80%"] .flag-translation-header {
+  margin-bottom: 4px;
+}
+
+.flag-translation[style*="font-size: 120%"] {
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+.flag-translation[style*="font-size: 120%"] .flag-translation-header {
+  margin-bottom: 8px;
+}
+
+.flag-translation[style*="font-size: 120%"] .close-translation {
+  width: 24px;
+  height: 24px;
+  font-size: 18px;
+}
+
+/* Hover effects for better interactivity */
+.flag-translation:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .flag-translation:hover,
+.dark .flag-translation:hover,
+body.dark .flag-translation:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Better integration with WhatsApp's message layout */
+[data-testid="msg-container"] .flag-translation {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* Ensure proper stacking order */
+.flag-translation {
+  z-index: 10;
+  position: relative;
+}
+
+/* Smooth transitions for dynamic changes */
+.flag-translation * {
+  transition: inherit;
+}
+
+/* Print styles - hide translations when printing */
+@media print {
+  .flag-translation {
+    display: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .flag-translation {
+    border-width: 2px;
+    font-weight: 500;
+  }
+  
+  .flag-translation-header {
+    font-weight: 700;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .flag-translation {
+    animation: none;
+  }
+  
+  .flag-translation.fade-out {
+    animation: none;
+    opacity: 0;
+  }
+  
+  .loading-dots span {
+    animation: none;
+  }
+  
+  .close-translation:hover {
+    transform: none;
+  }
+}
+
+/* Focus styles for accessibility */
+.close-translation:focus {
+  outline: 2px solid #25d366;
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .close-translation:focus,
+.dark .close-translation:focus,
+body.dark .close-translation:focus {
+  outline-color: #4ade80;
+}

@@ -1,0 +1,62 @@
+{
+  "manifest_version": 2,
+  "name": "WhatsApp Flag Translator",
+  "version": "4.0.0",
+  "description": "Translate WhatsApp messages instantly by reacting with flag emojis - FREE with LibreTranslate",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "https://web.whatsapp.com/*",
+    "https://*.whatsapp.com/*",
+    "https://libretranslate.de/*",
+    "https://translate.terraprint.co/*",
+    "https://libretranslate.com/*",
+    "https://translate.astian.org/*",
+    "https://translate.api.skitzen.com/*",
+    "https://translate-api.fedilab.app/*",
+    "https://translate.fortytwo-it.com/*",
+    "https://translate.mentality.rip/*",
+    "https://translate.argosopentech.com/*",
+    "https://translate.northeurope.cloudapp.azure.com/*"
+  ],
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://*.whatsapp.com/*"
+      ],
+      "js": [
+        "translator-core.js",
+        "content.js"
+      ],
+      "css": ["styles.css"],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "WhatsApp Flag Translator Settings",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  
+  "web_accessible_resources": [
+    "icons/*.png"
+  ]
+}
