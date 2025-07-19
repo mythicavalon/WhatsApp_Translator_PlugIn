@@ -299,6 +299,67 @@ window.testWhatsAppTranslator = function() {
     }
   };
 
+  // New debug function to analyze current DOM for reactions
+  window.debugReactions = function() {
+    console.log('🔍 DEBUG: Analyzing current page for reactions...');
+    
+    // Search for all potential reaction elements
+    const selectors = [
+      'button[aria-label*="reaction"]',
+      'span[aria-label*="reaction"]', 
+      'div[aria-label*="reaction"]',
+      '[data-testid*="reaction"]',
+      'button[aria-label*="🇯🇵"]',
+      'button[aria-label*="🇩🇪"]', 
+      'button[aria-label*="🇪🇸"]',
+      'button[aria-label*="🇫🇷"]',
+      'span[aria-label*="🇯🇵"]',
+      'span[aria-label*="🇩🇪"]'
+    ];
+    
+    selectors.forEach(selector => {
+      const elements = document.querySelectorAll(selector);
+      if (elements.length > 0) {
+        console.log(`🎯 Found ${elements.length} elements with selector: ${selector}`);
+        elements.forEach((el, i) => {
+          console.log(`  Element ${i+1}:`, el);
+          console.log(`  Aria-label: "${el.getAttribute('aria-label')}"`);
+          console.log(`  Classes: "${el.className}"`);
+          console.log(`  Text: "${el.textContent}"`);
+        });
+      }
+    });
+    
+    // Also check for any elements containing flag emojis
+    const allElements = document.querySelectorAll('*');
+    const flagElements = [];
+    const flagRegex = /[\u{1F1E6}-\u{1F1FF}]{2}/u;
+    
+    allElements.forEach(el => {
+      const ariaLabel = el.getAttribute('aria-label') || '';
+      const title = el.getAttribute('title') || '';
+      const text = el.textContent || '';
+      
+      if (flagRegex.test(ariaLabel) || flagRegex.test(title) || flagRegex.test(text)) {
+        flagElements.push({
+          element: el,
+          ariaLabel,
+          title,
+          text: text.substring(0, 50),
+          tagName: el.tagName,
+          className: el.className
+        });
+      }
+    });
+    
+    console.log(`🚩 Found ${flagElements.length} elements with flag emojis:`, flagElements);
+    
+    return {
+      totalReactionElements: selectors.reduce((count, sel) => count + document.querySelectorAll(sel).length, 0),
+      flagElements: flagElements.length
+    };
+  };
+
 // Log every 5 seconds for first minute to confirm script is running
 let logCount = 0;
 const intervalId = setInterval(() => {

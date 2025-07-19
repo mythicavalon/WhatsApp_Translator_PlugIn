@@ -245,6 +245,10 @@ class WhatsAppTranslatorCore {
 
   checkForReactions(element) {
     console.log('🔍 Checking for reactions in element:', element);
+    console.log('🔍 Element classes:', element.className);
+    console.log('🔍 Element data-testid:', element.getAttribute ? element.getAttribute('data-testid') : 'N/A');
+    console.log('🔍 Element aria-label:', element.getAttribute ? element.getAttribute('aria-label') : 'N/A');
+    console.log('🔍 Element tag name:', element.tagName);
     
     // Multiple strategies to find reactions
     const reactionSelectors = [
@@ -257,7 +261,14 @@ class WhatsAppTranslatorCore {
       '.reactions-container',
       '[data-testid="emoji-reactions"]',
       'button[aria-label*="reaction"]',  // NEW: Button elements with reaction aria-label
-      'button.xo0jvv6[aria-label*="reaction"]'  // NEW: Specific button class we see in logs
+      'button.xo0jvv6[aria-label*="reaction"]',  // NEW: Specific button class we see in logs
+      // Add more comprehensive selectors
+      'span[aria-label*="reaction"]',
+      'div[aria-label*="reaction"]',
+      'button[title*="reaction"]',
+      'span[title*="reaction"]',
+      '[aria-label*="🇯🇵"]', '[aria-label*="🇩🇪"]', '[aria-label*="🇪🇸"]', '[aria-label*="🇫🇷"]',
+      '[aria-label*="🇮🇹"]', '[aria-label*="🇷🇺"]', '[aria-label*="🇺🇸"]', '[aria-label*="🇬🇧"]'
     ];
     
     let reactions = [];
@@ -270,11 +281,36 @@ class WhatsAppTranslatorCore {
     
     // Search within the element
     reactionSelectors.forEach(selector => {
-      const found = element.querySelectorAll ? element.querySelectorAll(selector) : [];
-      if (found.length > 0) {
-        console.log(`🎯 Found ${found.length} reactions with selector: ${selector}`);
+      try {
+        const found = element.querySelectorAll ? element.querySelectorAll(selector) : [];
+        if (found.length > 0) {
+          console.log(`🎯 Found ${found.length} reactions with selector: ${selector}`);
+          console.log('🎯 Reaction elements:', Array.from(found));
+        }
+        reactions.push(...found);
+      } catch (e) {
+        console.log('❌ Error with selector:', selector, e);
       }
-      reactions.push(...found);
+    });
+    
+    // Additional debug: check all buttons and spans for flag emojis
+    const allButtons = element.querySelectorAll ? element.querySelectorAll('button, span, div') : [];
+    allButtons.forEach((el, index) => {
+      const ariaLabel = el.getAttribute('aria-label') || '';
+      const title = el.getAttribute('title') || '';
+      const text = el.textContent || '';
+      
+      // Check for flag emojis in any text content
+      const flagRegex = /[\u{1F1E6}-\u{1F1FF}]{2}/u;
+      if (flagRegex.test(ariaLabel) || flagRegex.test(title) || flagRegex.test(text)) {
+        console.log(`🚩 Found potential flag element ${index}:`, el);
+        console.log(`🚩 Aria-label: "${ariaLabel}"`);
+        console.log(`🚩 Title: "${title}"`);
+        console.log(`🚩 Text: "${text}"`);
+        if (!reactions.includes(el)) {
+          reactions.push(el);
+        }
+      }
     });
     
     console.log(`📊 Total reactions found: ${reactions.length}`);
