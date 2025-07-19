@@ -653,39 +653,43 @@ class WhatsAppTranslatorCore {
   async translateWithMyMemory(text, targetLanguage) {
     this.logImportant('🔄 Trying MyMemory API (completely free)...');
     
-    try {
-      const baseLanguage = targetLanguage.split('-')[0];
-      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=auto|${baseLanguage}`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'WhatsApp-Flag-Translator/4.0.1'
+    // Try multiple source languages since MyMemory doesn't support 'auto'
+    const possibleSources = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'zh', 'ar'];
+    const baseLanguage = targetLanguage.split('-')[0];
+    
+    for (const sourceLanguage of possibleSources) {
+      try {
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLanguage}|${baseLanguage}`;
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'WhatsApp-Flag-Translator/4.0.2'
+          }
+        });
+        
+        if (!response.ok) continue;
+        
+        const data = await response.json();
+        
+        if (data && data.responseData && data.responseData.translatedText) {
+          const translation = data.responseData.translatedText;
+          // Check if it's actually translated and not just the same text
+          if (translation.toLowerCase() !== text.toLowerCase() && 
+              translation.trim() !== '' && 
+              !translation.includes('NO QUERY SPECIFIED')) {
+            this.logImportant(`✅ MyMemory API successful (${sourceLanguage}→${baseLanguage})`);
+            return translation;
+          }
         }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`MyMemory HTTP ${response.status}`);
+      } catch (error) {
+        this.log(`⚠️ MyMemory ${sourceLanguage}→${baseLanguage} failed:`, error.message);
+        continue;
       }
-      
-      const data = await response.json();
-      
-      if (data && data.responseData && data.responseData.translatedText) {
-        const translation = data.responseData.translatedText;
-        // Check if it's actually translated (MyMemory returns original text if can't translate)
-        if (translation.toLowerCase() !== text.toLowerCase()) {
-          this.logImportant('✅ MyMemory API successful');
-          return translation;
-        } else {
-          throw new Error('MyMemory returned same text - no translation available');
-        }
-      } else {
-        throw new Error('Invalid MyMemory response format');
-      }
-    } catch (error) {
-      this.logImportant('❌ MyMemory API failed:', error.message);
-      throw error;
     }
+    
+    // If all source languages failed
+    throw new Error('MyMemory API failed with all source languages');
   }
 
   async translateWithGoogleFallback(text, targetLanguage) {
