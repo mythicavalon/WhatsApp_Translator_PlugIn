@@ -525,23 +525,108 @@ class WhatsAppTranslatorCore {
   }
 
   findMessageContainer(reactionElement) {
+    if (this.settings.debugMode) {
+      this.log('🔍 Looking for message container for reaction:', reactionElement.tagName, reactionElement.className?.substring(0, 30));
+    }
+    
     // Try multiple strategies to find the message container
     const strategies = [
+      // Standard strategies
       () => reactionElement.closest('[data-testid="msg-container"]'),
       () => reactionElement.closest('.message-in'),
       () => reactionElement.closest('.message-out'),
       () => reactionElement.closest('[role="row"]'),
       () => reactionElement.closest('[data-testid="msg"]'),
       () => reactionElement.parentElement?.closest('[data-testid="msg-container"]'),
-      () => reactionElement.parentElement?.parentElement?.closest('[data-testid="msg-container"]')
+      () => reactionElement.parentElement?.parentElement?.closest('[data-testid="msg-container"]'),
+      
+      // Enhanced strategies for reaction tooltips/popups
+      () => {
+        // Look for message containers in the entire document if this is a floating reaction
+        const allMessages = document.querySelectorAll('[data-testid="msg-container"]');
+        // Find the most recently focused or active message
+        for (let msg of allMessages) {
+          if (msg.querySelector('.message-focus') || msg.querySelector('[data-testid="msg-reactions"]')) {
+            return msg;
+          }
+        }
+        return null;
+      },
+      
+      // Look for nearby message containers (within reasonable distance)
+      () => {
+        const allMessages = document.querySelectorAll('[data-testid="msg-container"]');
+        let closestMessage = null;
+        let closestDistance = Infinity;
+        
+        const reactionRect = reactionElement.getBoundingClientRect();
+        
+        for (let msg of allMessages) {
+          try {
+            const msgRect = msg.getBoundingClientRect();
+            const distance = Math.sqrt(
+              Math.pow(reactionRect.x - msgRect.x, 2) + 
+              Math.pow(reactionRect.y - msgRect.y, 2)
+            );
+            
+            if (distance < closestDistance && distance < 500) { // Within 500px
+              closestDistance = distance;
+              closestMessage = msg;
+            }
+          } catch (e) {
+            // Skip if getBoundingClientRect fails
+          }
+        }
+        
+        return closestMessage;
+      },
+      
+      // Look for the last message that was interacted with
+      () => {
+        const recentMessages = document.querySelectorAll('[data-testid="msg-container"]');
+        // Return the last message in the chat (most likely to have reactions)
+        return recentMessages[recentMessages.length - 1] || null;
+      },
+      
+      // Look for messages with existing reactions
+      () => {
+        const allMessages = document.querySelectorAll('[data-testid="msg-container"]');
+        for (let msg of allMessages) {
+          // Check if message has reactions using JavaScript instead of CSS :has()
+          const hasReactions = msg.querySelector('[data-testid*="reaction"]') || 
+                              msg.querySelector('[aria-label*="reacted"]') ||
+                              msg.querySelector('[data-testid="msg-reactions"]');
+          if (hasReactions) {
+            return msg;
+          }
+        }
+        return null;
+      }
     ];
     
-    for (const strategy of strategies) {
+    for (let i = 0; i < strategies.length; i++) {
       try {
-        const container = strategy();
-        if (container) return container;
+        const container = strategies[i]();
+        if (container) {
+          if (this.settings.debugMode) {
+            this.log(`✅ Found message container using strategy ${i + 1}:`, container.tagName, container.className?.substring(0, 30));
+          }
+          return container;
+        }
       } catch (error) {
-        // Continue to next strategy
+        if (this.settings.debugMode) {
+          this.log(`❌ Strategy ${i + 1} failed:`, error.message);
+        }
+      }
+    }
+    
+    if (this.settings.debugMode) {
+      this.log('❌ All strategies failed to find message container');
+      // Log available message containers for debugging
+      const allMessages = document.querySelectorAll('[data-testid="msg-container"]');
+      this.log(`📊 Found ${allMessages.length} total message containers on page`);
+      if (allMessages.length > 0) {
+        this.log('📍 Last message container:', allMessages[allMessages.length - 1]);
       }
     }
     
@@ -648,24 +733,33 @@ class WhatsAppTranslatorCore {
       'https://translate.argosopentech.com/translate',
       'https://translate.api.skitzen.com/translate',
       'https://libretranslate.de/translate',
-      'https://translate.terraprint.co/translate'
+      'https://translate.terraprint.co/translate',
+      'https://translate.mentality.rip/translate',
+      'https://translate.astian.org/translate',
+      'https://translate.fedilab.app/translate',
+      'https://translate.namazso.eu/translate'
     ];
 
     let lastError;
+    let attemptCount = 0;
+    
     for (const instance of instances) {
+      attemptCount++;
       try {
         // Add timeout to prevent hanging
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
         
         if (this.settings.debugMode) {
-          this.logImportant(`🔄 Trying ${instance} for "${text.substring(0, 30)}..." to ${targetLang}`);
+          this.logImportant(`🔄 Attempt ${attemptCount}/${instances.length}: Trying ${instance} for "${text.substring(0, 30)}..." to ${targetLang}`);
         }
 
         const response = await fetch(instance, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': 'WhatsApp-Flag-Translator/1.0'
           },
           body: JSON.stringify({
             q: text.substring(0, 500), // Limit text length to prevent overload
@@ -676,23 +770,48 @@ class WhatsAppTranslatorCore {
           signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
+
         if (this.settings.debugMode) {
           this.logImportant(`📊 Response status: ${response.status} from ${instance}`);
         }
-        
-        clearTimeout(timeoutId);
 
-        if (!response.ok) {
-          throw new Error(`LibreTranslate API error: ${response.status}`);
+        // Handle specific HTTP errors
+        if (response.status === 502) {
+          throw new Error(`Bad Gateway (502) - Server temporarily unavailable`);
+        } else if (response.status === 503) {
+          throw new Error(`Service Unavailable (503) - Server overloaded`);
+        } else if (response.status === 429) {
+          throw new Error(`Rate Limited (429) - Too many requests`);
+        } else if (response.status === 400) {
+          throw new Error(`Bad Request (400) - Invalid parameters`);
+        } else if (!response.ok) {
+          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
         }
 
         const data = await response.json();
-        return data.translatedText;
-      } catch (error) {
-        if (this.settings.debugMode) {
-          this.log(`Failed to translate with ${instance}:`, error.message);
+        
+        if (!data.translatedText) {
+          throw new Error('No translation returned in response');
         }
+        
+        this.logImportant(`✅ Translation successful from ${instance}`);
+        return data.translatedText;
+        
+      } catch (error) {
+        const errorMsg = error.name === 'AbortError' ? 'Request timeout' : error.message;
+        
+        if (this.settings.debugMode) {
+          this.log(`❌ Failed ${instance} (attempt ${attemptCount}):`, errorMsg);
+        }
+        
         lastError = error;
+        
+        // Add small delay between attempts to avoid overwhelming servers
+        if (attemptCount < instances.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        
         continue; // Try next instance
       }
     }
