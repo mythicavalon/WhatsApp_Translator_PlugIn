@@ -577,9 +577,11 @@ class WhatsAppTranslatorCore {
 
     // Try multiple LibreTranslate instances for reliability
     const instances = [
+      'https://libretranslate.com/translate',
+      'https://translate.argosopentech.com/translate',
+      'https://translate.api.skitzen.com/translate',
       'https://libretranslate.de/translate',
-      'https://translate.terraprint.co/translate',
-      'https://libretranslate.com/translate'
+      'https://translate.terraprint.co/translate'
     ];
 
     let lastError;
@@ -589,6 +591,10 @@ class WhatsAppTranslatorCore {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
         
+        if (this.settings.debugMode) {
+          this.logImportant(`🔄 Trying ${instance} for "${text.substring(0, 30)}..." to ${targetLang}`);
+        }
+
         const response = await fetch(instance, {
           method: 'POST',
           headers: {
@@ -602,6 +608,10 @@ class WhatsAppTranslatorCore {
           }),
           signal: controller.signal
         });
+
+        if (this.settings.debugMode) {
+          this.logImportant(`📊 Response status: ${response.status} from ${instance}`);
+        }
         
         clearTimeout(timeoutId);
 
@@ -620,7 +630,31 @@ class WhatsAppTranslatorCore {
       }
     }
 
-    throw new Error(`All LibreTranslate instances failed. Last error: ${lastError.message}`);
+    // If all LibreTranslate instances fail, try a simple Google Translate fallback
+    try {
+      this.logImportant('🔄 All LibreTranslate instances failed, trying Google Translate fallback...');
+      return await this.callGoogleTranslateFallback(text, targetLang);
+    } catch (fallbackError) {
+      throw new Error(`All translation services failed. LibreTranslate: ${lastError.message}, Fallback: ${fallbackError.message}`);
+    }
+  }
+
+  async callGoogleTranslateFallback(text, targetLang) {
+    // Simple Google Translate API fallback (unofficial)
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Google Translate API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    // Google Translate returns nested arrays, extract the translation
+    if (data && data[0] && data[0][0] && data[0][0][0]) {
+      return data[0][0][0];
+    } else {
+      throw new Error('Invalid response format from Google Translate');
+    }
   }
 
   compressText(text) {
