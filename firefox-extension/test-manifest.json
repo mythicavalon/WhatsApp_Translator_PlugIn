@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "WhatsApp Extension Test",
+  "version": "1.0.0",
+  "description": "Test extension to verify loading",
+  
+  "permissions": [
+    "https://web.whatsapp.com/*"
+  ],
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.whatsapp.com/*"
+      ],
+      "js": [
+        "test-content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  
+  "applications": {
+    "gecko": {
+      "id": "whatsapp-test@example.com"
+    }
+  }
+}

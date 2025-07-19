@@ -7,12 +7,17 @@
 // IMMEDIATE EXECUTION - This runs as soon as the script is injected
 // =============================================================================
 
+// IMMEDIATE LOGGING - This should appear first
 console.log("✅ Extension Loaded");
 console.log("🔥 FIREFOX EXTENSION CONTENT SCRIPT INJECTED!");
 console.log("📍 Current URL:", document.location.href);
 console.log("📍 Document title:", document.title);
 console.log("📍 Document ready state:", document.readyState);
 console.log("📍 User agent:", navigator.userAgent);
+
+// Add to window for debugging
+window.WHATSAPP_TRANSLATOR_LOADED = true;
+console.log("🔧 Set window.WHATSAPP_TRANSLATOR_LOADED = true");
 
 // =============================================================================
 // VISUAL CONFIRMATION BANNER - Shows immediately
