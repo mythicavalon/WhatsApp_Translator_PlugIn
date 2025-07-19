@@ -1,5 +1,6 @@
 /**
- * WhatsApp Flag Translator - Firefox Content Script
+ * WhatsApp Flag Translator - Firefox Content Script v3.0.1
+ * CSP-compliant safety release with enhanced debugging
  * BULLETPROOF VERSION - Guaranteed to show visual confirmation
  */
 

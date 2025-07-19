@@ -1,6 +1,7 @@
 /**
- * WhatsApp Flag Translator - Core Logic
- * Enhanced with user settings and improved flag detection
+ * WhatsApp Flag Translator - Core Logic v3.0.1
+ * Enhanced with user settings, improved flag detection, and CSP compliance
+ * Safety release with enhanced error handling and debugging
  */
 
 class WhatsAppTranslatorCore {
@@ -38,7 +39,8 @@ class WhatsAppTranslatorCore {
   async init() {
     if (this.isInitialized) return;
     
-    this.logImportant('🔧 Starting WhatsApp Flag Translator initialization...');
+    this.logImportant('🔧 Starting WhatsApp Flag Translator v3.0.1 initialization...');
+    this.logImportant('🛡️ CSP-compliant safety release with enhanced debugging');
     try {
       await this.loadSettings();
       this.logImportant('✅ Configuration loaded');
@@ -161,7 +163,14 @@ class WhatsAppTranslatorCore {
 
 
   setupMutationObserver() {
-    this.log('🔧 Setting up optimized mutation observer...');
+    this.log('🔧 Setting up optimized mutation observer (v3.0.1 safety release)...');
+    
+    // Enhanced DOM safety check
+    if (!document.body && !document.documentElement) {
+      this.logImportant('⚠️ DOM not ready, deferring observer setup');
+      setTimeout(() => this.setupMutationObserver(), 100);
+      return;
+    }
     
     // Simple, reliable mutation observer - no throttling for now
     this.observer = new MutationObserver((mutations) => {
@@ -776,7 +785,7 @@ class WhatsAppTranslatorCore {
           this.logImportant(`📊 Response status: ${response.status} from ${instance}`);
         }
 
-        // Handle specific HTTP errors
+        // Handle specific HTTP errors (v3.0.1 enhanced safety)
         if (response.status === 502) {
           throw new Error(`Bad Gateway (502) - Server temporarily unavailable`);
         } else if (response.status === 503) {
@@ -785,6 +794,8 @@ class WhatsAppTranslatorCore {
           throw new Error(`Rate Limited (429) - Too many requests`);
         } else if (response.status === 400) {
           throw new Error(`Bad Request (400) - Invalid parameters`);
+        } else if (response.status === 0) {
+          throw new Error(`Network Error (0) - Connection failed or blocked`);
         } else if (!response.ok) {
           throw new Error(`HTTP ${response.status} - ${response.statusText}`);
         }
