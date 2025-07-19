@@ -163,20 +163,24 @@ class WhatsAppTranslatorCore {
   setupMutationObserver() {
     this.log('🔧 Setting up optimized mutation observer...');
     
-    // Throttle mutation processing to prevent lag
-    let processingTimeout;
-    const throttleDelay = 500; // Process mutations every 500ms max
-    
+    // Simple, reliable mutation observer - no throttling for now
     this.observer = new MutationObserver((mutations) => {
-      // Clear previous timeout
-      if (processingTimeout) {
-        clearTimeout(processingTimeout);
+      if (this.settings.debugMode) {
+        this.logImportant(`👀 Mutation observer triggered with ${mutations.length} mutations`);
       }
       
-      // Throttle processing to prevent overwhelming the browser
-      processingTimeout = setTimeout(() => {
-        this.processMutationsBatch(mutations);
-      }, throttleDelay);
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              if (this.settings.debugMode) {
+                this.logImportant('➕ New element added:', node.tagName, node.className?.substring(0, 30));
+              }
+              this.checkForReactions(node);
+            }
+          });
+        }
+      });
     });
 
     // Start observing when the chat container is available
@@ -186,42 +190,7 @@ class WhatsAppTranslatorCore {
     console.log('🔧 Mutation observer setup completed');
   }
 
-  processMutationsBatch(mutations) {
-    // Only log if debug mode is enabled
-    if (this.settings.debugMode) {
-      this.logImportant(`👀 Processing ${mutations.length} mutations (batched)`);
-    }
-    
-    // Collect all new elements in one pass
-    const newElements = [];
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'childList') {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            newElements.push(node);
-          }
-        });
-      }
-    });
-    
-    // Process elements in batches to prevent lag
-    if (newElements.length > 0) {
-      this.processElementsBatch(newElements);
-    }
-  }
 
-  processElementsBatch(elements) {
-    // Process only the most recent elements to avoid lag
-    const maxElements = 5; // Limit processing to prevent overwhelming
-    const elementsToProcess = elements.slice(-maxElements);
-    
-    elementsToProcess.forEach((element, index) => {
-      // Add small delay between processing to prevent lag
-      setTimeout(() => {
-        this.checkForReactions(element);
-      }, index * 50); // 50ms delay between each element
-    });
-  }
 
   waitForChatContainer() {
     let retryCount = 0;
@@ -234,20 +203,21 @@ class WhatsAppTranslatorCore {
         this.logImportant('🔍 Looking for WhatsApp chat container...');
       }
       
-      // Try multiple selectors for WhatsApp chat container
-      const selectors = [
-        '[data-testid="conversation-panel-messages"]',
-        '#main',
-        '[role="main"]',
-        '[data-testid="chat"]',
-        '.app-wrapper-web #main',
-        '#app #main'
-      ];
+      // Simple, reliable chat container detection
+      let chatContainer = document.querySelector('#main');
       
-      let chatContainer = null;
-      for (const selector of selectors) {
-        chatContainer = document.querySelector(selector);
-        if (chatContainer) break;
+      // Log what we found for debugging
+      if (chatContainer) {
+        this.logImportant(`✅ Found chat container: ${chatContainer.tagName} with classes: ${chatContainer.className.substring(0, 50)}...`);
+      } else {
+        // Check if page is fully loaded
+        const allDivs = document.querySelectorAll('div[id]');
+        this.logImportant(`🔍 Page has ${allDivs.length} divs with IDs. Looking for #main...`);
+        allDivs.forEach(div => {
+          if (div.id) {
+            this.logImportant(`Found div with ID: ${div.id}`);
+          }
+        });
       }
       
       if (chatContainer) {
