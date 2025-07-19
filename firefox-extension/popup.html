@@ -252,6 +252,20 @@
       line-height: 1.4;
     }
 
+    .service-info {
+      background: #f0f8f0;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .service-info p {
+      margin: 0 0 8px 0;
+      color: #2e7d32;
+      font-weight: 500;
+    }
+
     .divider {
       height: 1px;
       background: #e1e5e9;
@@ -279,15 +293,18 @@
     <p>Translate WhatsApp messages with flag reactions</p>
   </div>
 
-  <!-- API Configuration Section -->
+  <!-- Translation Service Info -->
   <div class="section">
-    <h2>🔑 API Configuration</h2>
-    <div class="form-group">
-      <label for="apiKey">DeepL API Key</label>
-      <input type="text" id="apiKey" placeholder="Enter your DeepL API key...">
-      <div class="help-text">Get your free API key from <a href="https://www.deepl.com/pro-api" target="_blank">DeepL Pro API</a></div>
+    <h2>🆓 Free Translation Service</h2>
+    <div class="service-info">
+      <p><strong>Using LibreTranslate</strong> - Completely free, no API key required!</p>
+      <div class="help-text">
+        ✅ No registration needed<br>
+        ✅ No credit card required<br>
+        ✅ Open source translation service<br>
+        ✅ Supports 40+ languages
+      </div>
     </div>
-    <button class="btn" id="saveBtn">Save API Key</button>
     <div class="test-section">
       <button class="btn test-btn" id="testBtn">Test Translation</button>
     </div>

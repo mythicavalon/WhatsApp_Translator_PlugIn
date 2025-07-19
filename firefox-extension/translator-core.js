@@ -6,7 +6,6 @@
 class WhatsAppTranslatorCore {
   constructor(browserAPI) {
     this.browserAPI = browserAPI; // chrome or browser API
-    this.deepLApiKey = null;
     this.settings = {
       duration: 120,
       bubbleSize: 100,
@@ -14,8 +13,7 @@ class WhatsAppTranslatorCore {
       showFlag: true,
       compressText: true,
       cacheTranslations: true,
-      debugMode: false,
-      translationService: 'libretranslate' // 'libretranslate' or 'deepl'
+      debugMode: false
     };
     
     this.flagToLanguage = {
@@ -42,7 +40,6 @@ class WhatsAppTranslatorCore {
     
     this.log('🔧 Starting WhatsApp Flag Translator initialization...');
     try {
-      await this.loadApiKey();
       await this.loadSettings();
       this.log('✅ Configuration loaded');
       
@@ -81,10 +78,10 @@ class WhatsAppTranslatorCore {
       case 'ping':
         sendResponse({ status: 'active' });
         break;
-      case 'apiKeyUpdated':
-        await this.loadApiKey();
-        this.log('🔑 API key reloaded');
-        break;
+              case 'apiKeyUpdated':
+          // No longer needed - using LibreTranslate (no API key required)
+          this.log('🔑 LibreTranslate - no API key needed');
+          break;
       case 'settingsUpdated':
         if (request.data) {
           this.settings = { ...this.settings, ...request.data };
@@ -156,14 +153,7 @@ class WhatsAppTranslatorCore {
     }, 3000);
   }
 
-  async loadApiKey() {
-    try {
-      const result = await this.browserAPI.storage.sync.get(['deepLApiKey']);
-      this.deepLApiKey = result.deepLApiKey || null;
-    } catch (error) {
-      console.error('Error loading API key:', error);
-    }
-  }
+
 
   setupMutationObserver() {
     console.log('🔧 Setting up mutation observer...');
@@ -485,11 +475,7 @@ class WhatsAppTranslatorCore {
       return;
     }
 
-    // Check if API key is needed (only for DeepL)
-    if (this.settings.translationService === 'deepl' && !this.deepLApiKey) {
-      this.showError(messageContainer, 'DeepL API key not configured. Please set up your DeepL API key in the extension popup or switch to LibreTranslate (free) in settings.');
-      return;
-    }
+    // LibreTranslate is free - no API key needed!
 
     try {
       this.showLoadingIndicator(messageContainer, flagEmoji, messageId);
@@ -499,7 +485,7 @@ class WhatsAppTranslatorCore {
         textToTranslate = this.compressText(messageText);
       }
 
-      const translation = await this.callTranslationAPI(textToTranslate, targetLanguage);
+      const translation = await this.callLibreTranslateAPI(textToTranslate, targetLanguage);
       
       // Cache the translation if enabled
       if (this.settings.cacheTranslations) {
@@ -513,34 +499,7 @@ class WhatsAppTranslatorCore {
     }
   }
 
-  async callTranslationAPI(text, targetLanguage) {
-    if (this.settings.translationService === 'deepl') {
-      return await this.callDeepLAPI(text, targetLanguage);
-    } else {
-      return await this.callLibreTranslateAPI(text, targetLanguage);
-    }
-  }
 
-  async callDeepLAPI(text, targetLanguage) {
-    const response = await fetch('https://api-free.deepl.com/v2/translate', {
-      method: 'POST',
-      headers: {
-        'Authorization': `DeepL-Auth-Key ${this.deepLApiKey}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        text: text,
-        target_lang: targetLanguage.split('-')[0].toUpperCase()
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`DeepL API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.translations[0].text;
-  }
 
   async callLibreTranslateAPI(text, targetLanguage) {
     // Convert flag language codes to LibreTranslate format

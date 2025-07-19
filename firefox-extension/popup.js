@@ -8,8 +8,6 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 class PopupManager {
   constructor() {
-    this.apiKeyInput = document.getElementById('apiKey');
-    this.saveBtn = document.getElementById('saveBtn');
     this.testBtn = document.getElementById('testBtn');
     this.statusContainer = document.getElementById('status-container');
     this.extensionStatus = document.getElementById('extension-status');
@@ -44,33 +42,13 @@ class PopupManager {
   }
 
   async init() {
-    await this.loadSavedApiKey();
     await this.loadSettings();
     this.setupEventListeners();
     this.checkExtensionStatus();
     this.updateSliderValues();
   }
 
-  async loadSavedApiKey() {
-    try {
-      const result = await browserAPI.storage.sync.get(['deepLApiKey']);
-      if (result.deepLApiKey) {
-        // Show only the first 8 and last 4 characters for security
-        const key = result.deepLApiKey;
-        const maskedKey = key.length > 12 ? 
-          `${key.substring(0, 8)}${'*'.repeat(key.length - 12)}${key.substring(key.length - 4)}` : 
-          key;
-        this.apiKeyInput.value = maskedKey;
-        this.apiKeyInput.setAttribute('data-has-key', 'true');
-        this.showStatus('API key configured successfully', 'success');
-      } else {
-        this.showStatus('Please configure your DeepL API key to start translating', 'warning');
-      }
-    } catch (error) {
-      console.error('Error loading API key:', error);
-      this.showStatus('Error loading configuration', 'error');
-    }
-  }
+
 
   async loadSettings() {
     try {
@@ -93,28 +71,10 @@ class PopupManager {
   }
 
   setupEventListeners() {
-    // API Key events
-    this.saveBtn.addEventListener('click', () => this.saveApiKey());
+    // Test button
     this.testBtn.addEventListener('click', () => this.testTranslation());
-    
-    this.apiKeyInput.addEventListener('input', () => {
-      this.clearStatus();
-      this.saveBtn.disabled = false;
-    });
 
-    this.apiKeyInput.addEventListener('focus', () => {
-      if (this.apiKeyInput.getAttribute('data-has-key') === 'true') {
-        this.apiKeyInput.value = '';
-        this.apiKeyInput.removeAttribute('data-has-key');
-        this.apiKeyInput.placeholder = 'Enter your new DeepL API key...';
-      }
-    });
 
-    this.apiKeyInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        this.saveApiKey();
-      }
-    });
 
     // Settings events
     this.durationSlider.addEventListener('input', () => this.updateSliderValues());
@@ -128,98 +88,54 @@ class PopupManager {
     this.bubbleSizeValue.textContent = `${this.bubbleSizeSlider.value}%`;
   }
 
-  async saveApiKey() {
-    const apiKey = this.apiKeyInput.value.trim();
-    
-    if (!apiKey) {
-      this.showStatus('Please enter a valid API key', 'error');
-      return;
-    }
 
-    if (apiKey.includes('*')) {
-      this.showStatus('API key is already configured. Clear the field to enter a new one.', 'warning');
-      return;
-    }
-
-    // Basic validation - DeepL API keys are typically 36-40 characters
-    if (apiKey.length < 20) {
-      this.showStatus('API key seems too short. Please check your key.', 'error');
-      return;
-    }
-
-    try {
-      this.saveBtn.disabled = true;
-      this.saveBtn.textContent = 'Saving...';
-      
-      await browserAPI.storage.sync.set({ deepLApiKey: apiKey });
-      
-      // Test the API key
-      const isValid = await this.validateApiKey(apiKey);
-      if (isValid) {
-        // Mask the key in the input
-        const maskedKey = `${apiKey.substring(0, 8)}${'*'.repeat(apiKey.length - 12)}${apiKey.substring(apiKey.length - 4)}`;
-        this.apiKeyInput.value = maskedKey;
-        this.apiKeyInput.setAttribute('data-has-key', 'true');
-        
-        this.showStatus('API key saved and validated successfully!', 'success');
-        
-        // Notify content script to reload API key
-        this.notifyContentScript('apiKeyUpdated');
-      } else {
-        this.showStatus('API key saved but validation failed. Please check your key.', 'warning');
-      }
-    } catch (error) {
-      console.error('Error saving API key:', error);
-      this.showStatus('Error saving API key', 'error');
-    } finally {
-      this.saveBtn.disabled = false;
-      this.saveBtn.textContent = 'Save API Key';
-    }
-  }
-
-  async validateApiKey(apiKey) {
-    try {
-      const response = await fetch('https://api-free.deepl.com/v2/usage', {
-        method: 'GET',
-        headers: {
-          'Authorization': `DeepL-Auth-Key ${apiKey}`
-        }
-      });
-      return response.ok;
-    } catch (error) {
-      console.error('API validation error:', error);
-      return false;
-    }
-  }
 
   async testTranslation() {
     try {
-      const result = await browserAPI.storage.sync.get(['deepLApiKey']);
-      if (!result.deepLApiKey) {
-        this.showStatus('Please save your API key first', 'error');
-        return;
-      }
-
       this.testBtn.disabled = true;
       this.testBtn.textContent = 'Testing...';
       
-      const response = await fetch('https://api-free.deepl.com/v2/translate', {
-        method: 'POST',
-        headers: {
-          'Authorization': `DeepL-Auth-Key ${result.deepLApiKey}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          text: 'Hello, world!',
-          target_lang: 'ES'
-        })
-      });
+      // Test LibreTranslate with multiple instances
+      const instances = [
+        'https://libretranslate.de/translate',
+        'https://translate.terraprint.co/translate',
+        'https://libretranslate.com/translate'
+      ];
 
-      if (response.ok) {
-        const data = await response.json();
-        this.showStatus(`✅ Test successful! Translation: "${data.translations[0].text}"`, 'success');
+      let success = false;
+      let translation = '';
+
+      for (const instance of instances) {
+        try {
+          const response = await fetch(instance, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              q: 'Hello, world!',
+              source: 'en',
+              target: 'es',
+              format: 'text'
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            translation = data.translatedText;
+            success = true;
+            break;
+          }
+        } catch (error) {
+          console.log(`Failed to test with ${instance}:`, error);
+          continue;
+        }
+      }
+
+      if (success) {
+        this.showStatus(`✅ LibreTranslate test successful! Translation: "${translation}"`, 'success');
       } else {
-        this.showStatus('❌ Test failed. Please check your API key.', 'error');
+        this.showStatus('❌ Test failed. All LibreTranslate instances are unavailable.', 'error');
       }
     } catch (error) {
       console.error('Test translation error:', error);

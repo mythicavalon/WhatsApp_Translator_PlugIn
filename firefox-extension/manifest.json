@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "WhatsApp Flag Translator",
-  "version": "1.0.0",
-  "description": "Translate WhatsApp messages instantly by reacting with flag emojis",
+  "version": "3.0.0",
+  "description": "Translate WhatsApp messages instantly by reacting with flag emojis - FREE with LibreTranslate",
   
   "permissions": [
     "storage",
@@ -10,7 +10,9 @@
     "tabs",
     "https://web.whatsapp.com/*",
     "https://*.whatsapp.com/*",
-    "https://api-free.deepl.com/*"
+    "https://libretranslate.de/*",
+    "https://translate.terraprint.co/*",
+    "https://libretranslate.com/*"
   ],
   
   "content_scripts": [
