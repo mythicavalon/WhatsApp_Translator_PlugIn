@@ -6,8 +6,8 @@
   <title>WhatsApp Flag Translator</title>
   <style>
     body {
-      width: 350px;
-      min-height: 400px;
+      width: 380px;
+      min-height: 500px;
       margin: 0;
       padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -52,6 +52,10 @@
       margin-bottom: 16px;
     }
 
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
     label {
       display: block;
       margin-bottom: 6px;
@@ -76,6 +80,115 @@
       border-color: #25d366;
     }
 
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-group input[type="range"] {
+      flex: 1;
+    }
+
+    .input-group .value-display {
+      background: #f1f3f4;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      min-width: 50px;
+      text-align: center;
+      color: #666;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #e1e5e9;
+      outline: none;
+      appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #25d366;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #25d366;
+      cursor: pointer;
+      border: none;
+    }
+
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .toggle-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .toggle-group label {
+      margin: 0;
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #25d366;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
     .btn {
       background: #25d366;
       color: white;
@@ -98,12 +211,20 @@
       cursor: not-allowed;
     }
 
+    .btn-secondary {
+      background: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
     .status {
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      font-size: 14px;
-      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-top: 8px;
+      text-align: center;
     }
 
     .status.success {
@@ -127,136 +248,128 @@
     .help-text {
       font-size: 12px;
       color: #666;
-      margin-top: 6px;
+      margin-top: 4px;
       line-height: 1.4;
     }
 
-    .help-text a {
-      color: #25d366;
-      text-decoration: none;
+    .divider {
+      height: 1px;
+      background: #e1e5e9;
+      margin: 16px 0;
     }
 
-    .help-text a:hover {
-      text-decoration: underline;
-    }
-
-    .usage-guide {
-      background: #f8f9fa;
-      border-radius: 6px;
-      padding: 12px;
-      margin-top: 12px;
-    }
-
-    .usage-guide h3 {
-      margin: 0 0 8px 0;
-      font-size: 14px;
-      color: #333;
-    }
-
-    .usage-guide ol {
-      margin: 0;
-      padding-left: 20px;
-      font-size: 13px;
-      color: #666;
-    }
-
-    .usage-guide li {
-      margin-bottom: 4px;
-    }
-
-    .flag-examples {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    .test-section {
       margin-top: 8px;
     }
 
-    .flag-example {
-      background: white;
-      border: 1px solid #e1e5e9;
-      border-radius: 4px;
-      padding: 4px 8px;
+    .test-btn {
+      background: #17a2b8;
       font-size: 12px;
-      color: #666;
+      padding: 6px 12px;
     }
 
-    .footer {
-      text-align: center;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #e1e5e9;
-    }
-
-    .footer p {
-      margin: 0;
-      font-size: 12px;
-      color: #999;
-    }
-
-    .version {
-      font-size: 11px;
-      color: #ccc;
-      margin-top: 4px;
+    .test-btn:hover {
+      background: #138496;
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🌍 WhatsApp Flag Translator</h1>
-    <p>Translate messages with flag emoji reactions</p>
+    <h1>🌍 Flag Translator</h1>
+    <p>Translate WhatsApp messages with flag reactions</p>
   </div>
 
-  <div id="status-container"></div>
-
+  <!-- API Configuration Section -->
   <div class="section">
-    <h2>DeepL API Configuration</h2>
+    <h2>🔑 API Configuration</h2>
     <div class="form-group">
       <label for="apiKey">DeepL API Key</label>
       <input type="text" id="apiKey" placeholder="Enter your DeepL API key...">
-      <div class="help-text">
-        Get your free API key from <a href="https://www.deepl.com/pro-api" target="_blank">DeepL Pro API</a>
-      </div>
+      <div class="help-text">Get your free API key from <a href="https://www.deepl.com/pro-api" target="_blank">DeepL Pro API</a></div>
     </div>
     <button class="btn" id="saveBtn">Save API Key</button>
+    <div class="test-section">
+      <button class="btn test-btn" id="testBtn">Test Translation</button>
+    </div>
+    <div id="status-container"></div>
   </div>
 
+  <!-- Translation Settings Section -->
   <div class="section">
-    <h2>How to Use</h2>
-    <div class="usage-guide">
-      <h3>Simple Steps:</h3>
-      <ol>
-        <li>React to any WhatsApp message with a flag emoji</li>
-        <li>The extension will automatically translate the message</li>
-        <li>Translation appears below the original message</li>
-        <li>Auto-hides after 2 minutes or click × to close</li>
-      </ol>
+    <h2>⚙️ Translation Settings</h2>
+    
+    <div class="form-group">
+      <label for="duration">Auto-hide Duration</label>
+      <div class="input-group">
+        <input type="range" id="duration" min="30" max="300" value="120">
+        <div class="value-display" id="durationValue">120s</div>
+      </div>
+      <div class="help-text">How long translations stay visible (30s - 5min)</div>
     </div>
 
-    <div class="usage-guide">
-      <h3>Supported Flags:</h3>
-      <div class="flag-examples">
-        <span class="flag-example">🇺🇸 English</span>
-        <span class="flag-example">🇪🇸 Spanish</span>
-        <span class="flag-example">🇫🇷 French</span>
-        <span class="flag-example">🇩🇪 German</span>
-        <span class="flag-example">🇮🇹 Italian</span>
-        <span class="flag-example">🇯🇵 Japanese</span>
-        <span class="flag-example">🇰🇷 Korean</span>
-        <span class="flag-example">🇨🇳 Chinese</span>
-        <span class="flag-example">🇷🇺 Russian</span>
-        <span class="flag-example">🇵🇹 Portuguese</span>
-        <span class="flag-example">🇳🇱 Dutch</span>
-        <span class="flag-example">🇵🇱 Polish</span>
-        <span class="flag-example">🇮🇳 Hindi</span>
-        <span class="flag-example">🇸🇦 Arabic</span>
-        <span class="flag-example">+ 20 more</span>
+    <div class="form-group">
+      <label for="bubbleSize">Bubble Size</label>
+      <div class="input-group">
+        <input type="range" id="bubbleSize" min="80" max="120" value="100">
+        <div class="value-display" id="bubbleSizeValue">100%</div>
+      </div>
+      <div class="help-text">Size of translation bubbles relative to original</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="toggle-group">
+      <label for="autoHide">Auto-hide translations</label>
+      <div class="toggle">
+        <input type="checkbox" id="autoHide" checked>
+        <span class="slider"></span>
       </div>
     </div>
+
+    <div class="toggle-group">
+      <label for="showFlag">Show flag emoji in bubble</label>
+      <div class="toggle">
+        <input type="checkbox" id="showFlag" checked>
+        <span class="slider"></span>
+      </div>
+    </div>
+
+    <div class="toggle-group">
+      <label for="compressText">Compress translations (20% shorter)</label>
+      <div class="toggle">
+        <input type="checkbox" id="compressText" checked>
+        <span class="slider"></span>
+      </div>
+    </div>
+
+    <div class="toggle-group">
+      <label for="cacheTranslations">Cache translations</label>
+      <div class="toggle">
+        <input type="checkbox" id="cacheTranslations" checked>
+        <span class="slider"></span>
+      </div>
+    </div>
+
+    <div class="toggle-group">
+      <label for="debugMode">Debug mode (console logs)</label>
+      <div class="toggle">
+        <input type="checkbox" id="debugMode">
+        <span class="slider"></span>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" id="saveSettingsBtn">Save Settings</button>
   </div>
 
-  <div class="footer">
-    <p>Made with ❤️ for WhatsApp Web</p>
-    <div class="version">v1.0.0</div>
+  <!-- Status Section -->
+  <div class="section">
+    <h2>📊 Status</h2>
+    <div id="extension-status">
+      <div class="help-text">Extension status will appear here...</div>
+    </div>
+    <div class="test-section">
+      <button class="btn btn-secondary" id="resetBtn">Reset All Settings</button>
+    </div>
   </div>
 
   <script src="popup.js"></script>

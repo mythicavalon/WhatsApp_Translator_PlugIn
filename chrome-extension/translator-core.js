@@ -1,12 +1,22 @@
 /**
  * WhatsApp Flag Translator - Core Logic
- * Shared between Chrome and Firefox extensions
+ * Enhanced with user settings and improved flag detection
  */
 
 class WhatsAppTranslatorCore {
   constructor(browserAPI) {
     this.browserAPI = browserAPI; // chrome or browser API
     this.deepLApiKey = null;
+    this.settings = {
+      duration: 120,
+      bubbleSize: 100,
+      autoHide: true,
+      showFlag: true,
+      compressText: true,
+      cacheTranslations: true,
+      debugMode: false
+    };
+    
     this.flagToLanguage = {
       '🇺🇸': 'en-US', '🇬🇧': 'en-GB', '🇪🇸': 'es', '🇫🇷': 'fr', '🇩🇪': 'de',
       '🇮🇹': 'it', '🇵🇹': 'pt', '🇷🇺': 'ru', '🇯🇵': 'ja', '🇰🇷': 'ko',
@@ -18,29 +28,87 @@ class WhatsAppTranslatorCore {
       '🇺🇦': 'uk', '🇷🇴': 'ro', '🇧🇬': 'bg', '🇭🇷': 'hr', '🇸🇮': 'sl',
       '🇱🇹': 'lt', '🇱🇻': 'lv', '🇪🇪': 'et'
     };
+    
     this.translationCache = new Map();
     this.activeTranslations = new Map();
     this.observer = null;
+    this.reactionObserver = null;
+    this.isInitialized = false;
   }
 
   async init() {
-    console.log('🔧 Starting WhatsApp Flag Translator initialization...');
+    if (this.isInitialized) return;
+    
+    this.log('🔧 Starting WhatsApp Flag Translator initialization...');
     try {
       await this.loadApiKey();
-      console.log('✅ API key loaded');
+      await this.loadSettings();
+      this.log('✅ Configuration loaded');
       
       this.setupMutationObserver();
-      console.log('✅ Mutation observer setup');
+      this.log('✅ Mutation observer setup');
       
       this.setupMessageObserver();
-      console.log('✅ Message observer setup');
+      this.log('✅ Message observer setup');
       
-      console.log('🎉 WhatsApp Flag Translator fully initialized and ready!');
+      this.setupMessageListener();
+      this.log('✅ Message listener setup');
       
-      // Add visual confirmation
-      this.showInitializationMessage();
+      this.isInitialized = true;
+      this.log('🎉 WhatsApp Flag Translator fully initialized and ready!');
+      
+      // Add visual confirmation if debug mode is enabled
+      if (this.settings.debugMode) {
+        this.showInitializationMessage();
+      }
     } catch (error) {
       console.error('❌ Error during initialization:', error);
+    }
+  }
+
+  setupMessageListener() {
+    // Listen for messages from popup
+    if (this.browserAPI && this.browserAPI.runtime && this.browserAPI.runtime.onMessage) {
+      this.browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        this.handleMessage(request, sender, sendResponse);
+      });
+    }
+  }
+
+  async handleMessage(request, sender, sendResponse) {
+    switch (request.action) {
+      case 'ping':
+        sendResponse({ status: 'active' });
+        break;
+      case 'apiKeyUpdated':
+        await this.loadApiKey();
+        this.log('🔑 API key reloaded');
+        break;
+      case 'settingsUpdated':
+        if (request.data) {
+          this.settings = { ...this.settings, ...request.data };
+        } else {
+          await this.loadSettings();
+        }
+        this.log('⚙️ Settings updated:', this.settings);
+        break;
+    }
+  }
+
+  async loadSettings() {
+    try {
+      const result = await this.browserAPI.storage.sync.get(['translatorSettings']);
+      if (result.translatorSettings) {
+        this.settings = { ...this.settings, ...result.translatorSettings };
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  }
+
+  log(message, ...args) {
+    if (this.settings.debugMode) {
+      console.log(message, ...args);
     }
   }
 
@@ -54,39 +122,49 @@ class WhatsAppTranslatorCore {
       right: 20px;
       background: #25d366;
       color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: Arial, sans-serif;
       font-size: 14px;
-      z-index: 9999;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      font-weight: bold;
+      z-index: 999999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: slideInRight 0.5s ease-out;
     `;
+    
+    // Add animation keyframes
+    if (!document.getElementById('translator-animations')) {
+      const style = document.createElement('style');
+      style.id = 'translator-animations';
+      style.textContent = `
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
     document.body.appendChild(indicator);
     
     // Remove after 3 seconds
     setTimeout(() => {
       if (indicator.parentNode) {
-        indicator.parentNode.removeChild(indicator);
+        indicator.remove();
       }
     }, 3000);
   }
 
   async loadApiKey() {
     try {
-      console.log('🔑 Loading API key from storage...');
       const result = await this.browserAPI.storage.sync.get(['deepLApiKey']);
-      this.deepLApiKey = result.deepLApiKey;
-      if (!this.deepLApiKey) {
-        console.warn('⚠️ DeepL API key not found. Please set it in the extension popup.');
-      } else {
-        console.log('✅ API key loaded successfully');
-      }
+      this.deepLApiKey = result.deepLApiKey || null;
     } catch (error) {
-      console.error('❌ Error loading API key:', error);
+      console.error('Error loading API key:', error);
     }
   }
 
   setupMutationObserver() {
-    // Observer for new messages and reactions
     this.observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'childList') {
@@ -105,28 +183,40 @@ class WhatsAppTranslatorCore {
 
   waitForChatContainer() {
     const checkForContainer = () => {
-      console.log('🔍 Looking for WhatsApp chat container...');
+      this.log('🔍 Looking for WhatsApp chat container...');
       const chatContainer = document.querySelector('[data-testid="conversation-panel-messages"]') ||
                            document.querySelector('#main') ||
-                           document.querySelector('[role="main"]');
+                           document.querySelector('[role="main"]') ||
+                           document.querySelector('[data-testid="chat"]');
       
       if (chatContainer) {
         this.observer.observe(chatContainer, {
           childList: true,
           subtree: true
         });
-        console.log('👀 Started observing chat container:', chatContainer.tagName);
+        this.log('👀 Started observing chat container:', chatContainer.tagName);
+        
+        // Also check existing messages for reactions
+        this.scanExistingMessages(chatContainer);
       } else {
-        console.log('⏳ Chat container not found, retrying in 1 second...');
+        this.log('⏳ Chat container not found, retrying in 1 second...');
         setTimeout(checkForContainer, 1000);
       }
     };
     checkForContainer();
   }
 
+  scanExistingMessages(container) {
+    // Check existing messages for reactions
+    const messages = container.querySelectorAll('[data-testid="msg-container"]');
+    messages.forEach(message => {
+      this.checkForReactions(message);
+    });
+  }
+
   setupMessageObserver() {
     // Additional observer for reaction changes on existing messages
-    const reactionObserver = new MutationObserver((mutations) => {
+    this.reactionObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'childList' || mutation.type === 'attributes') {
           const target = mutation.target;
@@ -138,46 +228,67 @@ class WhatsAppTranslatorCore {
     });
 
     // Observe the entire document for reaction changes
-    reactionObserver.observe(document.body, {
+    this.reactionObserver.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['class', 'data-testid']
+      attributeFilter: ['class', 'data-testid', 'title', 'aria-label']
     });
   }
 
   checkForReactions(element) {
-    // Look for reaction elements in the added/modified nodes
-    const reactions = element.querySelectorAll ? 
-      element.querySelectorAll('[data-testid*="reaction"], .message-reaction, [title*="reacted"]') : 
-      [];
+    // Multiple strategies to find reactions
+    const reactionSelectors = [
+      '[data-testid*="reaction"]',
+      '.message-reaction',
+      '[title*="reacted"]',
+      '[aria-label*="reacted"]',
+      '[data-testid="reactions"]',
+      '.reactions-container',
+      '[data-testid="emoji-reactions"]'
+    ];
     
-    reactions.forEach(reaction => this.processReaction(reaction));
-
-    // Also check if the element itself is a reaction
-    if (element.getAttribute && (
-      element.getAttribute('data-testid')?.includes('reaction') ||
-      element.classList?.contains('message-reaction') ||
-      element.title?.includes('reacted')
-    )) {
-      this.processReaction(element);
+    let reactions = [];
+    
+    // Check if element itself is a reaction
+    if (this.isReactionElement(element)) {
+      reactions.push(element);
     }
+    
+    // Search within the element
+    reactionSelectors.forEach(selector => {
+      const found = element.querySelectorAll ? element.querySelectorAll(selector) : [];
+      reactions.push(...found);
+    });
+    
+    // Process each reaction found
+    reactions.forEach(reaction => this.processReaction(reaction));
+  }
+
+  isReactionElement(element) {
+    if (!element.getAttribute && !element.classList) return false;
+    
+    const testId = element.getAttribute('data-testid') || '';
+    const className = element.className || '';
+    const title = element.getAttribute('title') || '';
+    const ariaLabel = element.getAttribute('aria-label') || '';
+    
+    return testId.includes('reaction') ||
+           className.includes('reaction') ||
+           title.includes('reacted') ||
+           ariaLabel.includes('reacted');
   }
 
   processReaction(reactionElement) {
     try {
       // Find flag emojis in the reaction
-      const reactionText = reactionElement.textContent || reactionElement.innerText || '';
+      const reactionText = this.getElementText(reactionElement);
       const flagEmojis = this.extractFlagEmojis(reactionText);
       
       if (flagEmojis.length === 0) return;
 
-      // Find the associated message
-      const messageContainer = reactionElement.closest('[data-testid="msg-container"]') ||
-                              reactionElement.closest('.message-in') ||
-                              reactionElement.closest('.message-out') ||
-                              reactionElement.closest('[role="row"]');
-
+      // Find the associated message with multiple strategies
+      const messageContainer = this.findMessageContainer(reactionElement);
       if (!messageContainer) return;
 
       // Extract message text
@@ -187,7 +298,7 @@ class WhatsAppTranslatorCore {
       // Get unique message ID
       const messageId = this.getMessageId(messageContainer);
       
-      console.log('🎯 Flag reaction detected!', {
+      this.log('🎯 Flag reaction detected!', {
         flags: flagEmojis,
         messagePreview: messageText.substring(0, 50) + '...',
         messageId: messageId
@@ -197,19 +308,46 @@ class WhatsAppTranslatorCore {
       flagEmojis.forEach(flagEmoji => {
         const targetLanguage = this.flagToLanguage[flagEmoji];
         if (targetLanguage) {
-          console.log(`🔄 Translating to ${targetLanguage} (${flagEmoji})`);
+          this.log(`🔄 Translating to ${targetLanguage} (${flagEmoji})`);
           this.translateMessage(messageContainer, messageText, targetLanguage, flagEmoji, messageId);
-        } else {
-          console.log(`⚠️ Unsupported flag emoji: ${flagEmoji}`);
         }
       });
     } catch (error) {
-      console.error('❌ Error processing reaction:', error);
+      console.error('Error processing reaction:', error);
     }
   }
 
+  getElementText(element) {
+    return element.textContent || element.innerText || element.innerHTML || '';
+  }
+
+  findMessageContainer(reactionElement) {
+    // Try multiple strategies to find the message container
+    const strategies = [
+      () => reactionElement.closest('[data-testid="msg-container"]'),
+      () => reactionElement.closest('.message-in'),
+      () => reactionElement.closest('.message-out'),
+      () => reactionElement.closest('[role="row"]'),
+      () => reactionElement.closest('[data-testid="msg"]'),
+      () => reactionElement.parentElement?.closest('[data-testid="msg-container"]'),
+      () => reactionElement.parentElement?.parentElement?.closest('[data-testid="msg-container"]')
+    ];
+    
+    for (const strategy of strategies) {
+      try {
+        const container = strategy();
+        if (container) return container;
+      } catch (error) {
+        // Continue to next strategy
+      }
+    }
+    
+    return null;
+  }
+
   extractFlagEmojis(text) {
-    const flagRegex = /[\u{1F1E6}-\u{1F1FF}][\u{1F1E6}-\u{1F1FF}]/gu;
+    // Unicode ranges for flag emojis
+    const flagRegex = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
     return text.match(flagRegex) || [];
   }
 
@@ -219,82 +357,71 @@ class WhatsAppTranslatorCore {
       '[data-testid="msg-text"]',
       '.message-text',
       '.selectable-text',
-      '[role="row"] span',
+      '[data-testid="conversation-text"]',
       '.copyable-text span'
     ];
-
+    
     for (const selector of textSelectors) {
       const textElement = messageContainer.querySelector(selector);
-      if (textElement) {
-        return textElement.textContent?.trim() || textElement.innerText?.trim();
+      if (textElement && textElement.textContent?.trim()) {
+        return textElement.textContent.trim();
       }
     }
-
-    // Fallback: get text from the entire container but filter out unwanted elements
-    const clonedContainer = messageContainer.cloneNode(true);
     
-    // Remove reaction elements, timestamps, etc.
-    const unwantedSelectors = [
-      '[data-testid*="reaction"]',
-      '.message-reaction',
-      '[data-testid="msg-time"]',
-      '.message-datetime',
-      '[data-testid="msg-dblcheck"]',
-      '.message-status'
-    ];
-    
-    unwantedSelectors.forEach(selector => {
-      const elements = clonedContainer.querySelectorAll(selector);
-      elements.forEach(el => el.remove());
-    });
-
-    return clonedContainer.textContent?.trim() || clonedContainer.innerText?.trim();
+    // Fallback: get all text content but filter out reaction text
+    const allText = messageContainer.textContent || '';
+    const flagRegex = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
+    return allText.replace(flagRegex, '').trim();
   }
 
   getMessageId(messageContainer) {
     // Try to get a unique identifier for the message
-    const dataId = messageContainer.getAttribute('data-id') ||
-                  messageContainer.getAttribute('data-testid') ||
-                  messageContainer.id;
-    
-    if (dataId) return dataId;
-
-    // Fallback: create ID based on message content and position
-    const messageText = this.extractMessageText(messageContainer);
-    const timestamp = messageContainer.querySelector('[data-testid="msg-time"]')?.textContent || '';
-    return btoa(messageText.substring(0, 50) + timestamp).replace(/[^a-zA-Z0-9]/g, '');
+    return messageContainer.getAttribute('data-id') ||
+           messageContainer.getAttribute('id') ||
+           messageContainer.querySelector('[data-id]')?.getAttribute('data-id') ||
+           `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   async translateMessage(messageContainer, messageText, targetLanguage, flagEmoji, messageId) {
-    if (!this.deepLApiKey) {
-      this.showError(messageContainer, 'DeepL API key not configured');
-      return;
-    }
-
+    // Check cache first if enabled
     const cacheKey = `${messageText}-${targetLanguage}`;
-    
-    // Check cache first
-    if (this.translationCache.has(cacheKey)) {
+    if (this.settings.cacheTranslations && this.translationCache.has(cacheKey)) {
       const cachedTranslation = this.translationCache.get(cacheKey);
       this.displayTranslation(messageContainer, cachedTranslation, flagEmoji, messageId);
+      this.log('📦 Used cached translation');
       return;
     }
 
-    // Show loading indicator
-    this.showLoadingIndicator(messageContainer, flagEmoji, messageId);
+    // Check if we already have an active translation for this message
+    if (this.activeTranslations.has(messageId)) {
+      this.log('⏭️ Translation already active for this message');
+      return;
+    }
+
+    if (!this.deepLApiKey) {
+      this.showError(messageContainer, 'API key not configured. Please set up your DeepL API key in the extension popup.');
+      return;
+    }
 
     try {
-      const translation = await this.callDeepLAPI(messageText, targetLanguage);
-      const compressedTranslation = this.compressText(translation);
+      this.showLoadingIndicator(messageContainer, flagEmoji, messageId);
+
+      let textToTranslate = messageText;
+      if (this.settings.compressText) {
+        textToTranslate = this.compressText(messageText);
+      }
+
+      const translation = await this.callDeepLAPI(textToTranslate, targetLanguage);
       
-      // Cache the result
-      this.translationCache.set(cacheKey, compressedTranslation);
-      
-      // Display translation
-      this.displayTranslation(messageContainer, compressedTranslation, flagEmoji, messageId);
+      // Cache the translation if enabled
+      if (this.settings.cacheTranslations) {
+        this.translationCache.set(cacheKey, translation);
+      }
+
+      this.displayTranslation(messageContainer, translation, flagEmoji, messageId);
     } catch (error) {
       console.error('Translation error:', error);
-      this.showError(messageContainer, 'Translation failed');
+      this.showError(messageContainer, `Translation failed: ${error.message}`);
     }
   }
 
@@ -338,9 +465,13 @@ class WhatsAppTranslatorCore {
 
     const loadingDiv = document.createElement('div');
     loadingDiv.className = 'flag-translation loading';
+    loadingDiv.style.fontSize = `${this.settings.bubbleSize}%`;
+    
+    const flagDisplay = this.settings.showFlag ? `<span class="flag-emoji">${flagEmoji}</span>` : '';
+    
     loadingDiv.innerHTML = `
       <div class="flag-translation-header">
-        <span class="flag-emoji">${flagEmoji}</span>
+        ${flagDisplay}
         <span class="translation-status">Translating...</span>
       </div>
       <div class="translation-content">
@@ -363,9 +494,13 @@ class WhatsAppTranslatorCore {
     // Create translation element that looks like a WhatsApp message bubble
     const translationDiv = document.createElement('div');
     translationDiv.className = 'flag-translation';
+    translationDiv.style.fontSize = `${this.settings.bubbleSize}%`;
+    
+    const flagDisplay = this.settings.showFlag ? `<span class="flag-emoji">${flagEmoji}</span>` : '';
+    
     translationDiv.innerHTML = `
       <div class="flag-translation-header">
-        <span class="flag-emoji">${flagEmoji}</span>
+        ${flagDisplay}
         <span class="translation-status">Auto-translated</span>
         <button class="close-translation" aria-label="Close translation">×</button>
       </div>
@@ -390,21 +525,23 @@ class WhatsAppTranslatorCore {
     // Store active translation
     this.activeTranslations.set(messageId, translationDiv);
 
-    // Auto-hide after 120 seconds with fade effect
-    setTimeout(() => {
-      if (translationDiv.parentNode) {
-        translationDiv.classList.add('fade-out');
-        setTimeout(() => {
-          if (translationDiv.parentNode) {
-            translationDiv.remove();
-            this.activeTranslations.delete(messageId);
-          }
-        }, 300);
-      }
-    }, 120000);
+    // Auto-hide after configured duration if enabled
+    if (this.settings.autoHide) {
+      setTimeout(() => {
+        if (translationDiv.parentNode) {
+          translationDiv.classList.add('fade-out');
+          setTimeout(() => {
+            if (translationDiv.parentNode) {
+              translationDiv.remove();
+              this.activeTranslations.delete(messageId);
+            }
+          }, 300);
+        }
+      }, this.settings.duration * 1000);
+    }
 
     // Log successful translation
-    console.log('✅ Translation displayed:', {
+    this.log('✅ Translation displayed:', {
       flag: flagEmoji,
       original: messageContainer.textContent?.substring(0, 50) + '...',
       translated: translation.substring(0, 50) + '...'
@@ -419,6 +556,7 @@ class WhatsAppTranslatorCore {
 
     const errorDiv = document.createElement('div');
     errorDiv.className = 'flag-translation error';
+    errorDiv.style.fontSize = `${this.settings.bubbleSize}%`;
     errorDiv.innerHTML = `
       <div class="flag-translation-header">
         <span class="translation-status">Error</span>

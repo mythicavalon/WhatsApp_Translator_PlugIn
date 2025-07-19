@@ -1,116 +1,75 @@
 /**
- * WhatsApp Flag Translator - Styles
- * Styles for inline translation display
+ * WhatsApp Flag Translator - Enhanced Styles
+ * Configurable bubble sizes and improved animations
  */
 
 .flag-translation {
   margin: 6px 0 4px 0;
-  padding: 6px 10px;
+  padding: 8px 12px;
   background: #e7f3ff;
-  border-radius: 6px;
+  border-radius: 8px;
   font-family: inherit;
-  font-size: 11px;
-  line-height: 1.3;
-  animation: slideIn 0.3s ease-out;
+  font-size: 12px; /* Base size - will be scaled by settings */
+  line-height: 1.4;
+  animation: slideInUp 0.3s ease-out;
   position: relative;
-  max-width: 80%;
+  max-width: 85%;
   word-wrap: break-word;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   border: 1px solid #d1e7dd;
-  opacity: 0.9;
-  transform: scale(0.8);
+  opacity: 0.95;
   transform-origin: left top;
+  transition: all 0.3s ease;
 }
 
-/* Dark mode support */
-[data-theme="dark"] .flag-translation,
-.dark .flag-translation {
-  background: #1f2937;
-  color: #e9edef;
-  border: 1px solid #374151;
+/* Enhanced animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 0.95;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.flag-translation-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-  font-size: 9px;
-  color: #667781;
-  font-weight: 500;
+@keyframes slideInRight {
+  from { 
+    transform: translateX(100%); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateX(0); 
+    opacity: 1; 
+  }
 }
 
-[data-theme="dark"] .flag-translation-header,
-.dark .flag-translation-header {
-  color: #8696a0;
+.flag-translation.fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
 }
 
-.flag-emoji {
-  font-size: 12px;
-  line-height: 1;
-}
-
-.translation-status {
-  flex: 1;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.close-translation {
-  background: none;
-  border: none;
-  color: #667781;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  padding: 0;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.close-translation:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: #000;
-}
-
-[data-theme="dark"] .close-translation,
-.dark .close-translation {
-  color: #8696a0;
-}
-
-[data-theme="dark"] .close-translation:hover,
-.dark .close-translation:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-
-.translation-content {
-  color: #111b21;
-  font-size: 11px;
-  line-height: 1.3;
-  margin: 0;
-  padding: 0;
-  font-weight: 400;
-}
-
-[data-theme="dark"] .translation-content,
-.dark .translation-content {
-  color: #e9edef;
+@keyframes fadeOut {
+  from {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
 }
 
 /* Loading state */
 .flag-translation.loading {
-  border-left-color: #54656f;
+  background: #f8f9fa;
+  border-color: #dee2e6;
 }
 
 .flag-translation.loading .translation-content {
   display: flex;
   align-items: center;
+  justify-content: center;
   min-height: 20px;
 }
 
@@ -123,55 +82,16 @@
 .loading-dots span {
   width: 6px;
   height: 6px;
+  background: #25d366;
   border-radius: 50%;
-  background: #667781;
-  animation: loadingDot 1.4s infinite ease-in-out;
+  animation: loadingPulse 1.4s infinite ease-in-out;
 }
 
-.loading-dots span:nth-child(1) {
-  animation-delay: -0.32s;
-}
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+.loading-dots span:nth-child(3) { animation-delay: 0s; }
 
-.loading-dots span:nth-child(2) {
-  animation-delay: -0.16s;
-}
-
-[data-theme="dark"] .loading-dots span,
-.dark .loading-dots span {
-  background: #8696a0;
-}
-
-/* Error state */
-.flag-translation.error {
-  border-left-color: #e53e3e;
-  background: rgba(229, 62, 62, 0.1);
-}
-
-.flag-translation.error .translation-content {
-  color: #e53e3e;
-  font-weight: 500;
-}
-
-[data-theme="dark"] .flag-translation.error,
-.dark .flag-translation.error {
-  background: rgba(229, 62, 62, 0.15);
-}
-
-/* Animations */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    max-height: 200px;
-  }
-}
-
-@keyframes loadingDot {
+@keyframes loadingPulse {
   0%, 80%, 100% {
     transform: scale(0.8);
     opacity: 0.5;
@@ -182,122 +102,233 @@
   }
 }
 
-.flag-translation.fade-out {
-  animation: fadeOut 0.3s ease-out forwards;
+/* Error state */
+.flag-translation.error {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
 }
 
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-    max-height: 200px;
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-10px);
-    max-height: 0;
-    margin: 0;
-    padding: 0;
-  }
+.flag-translation.error .flag-translation-header {
+  color: #721c24;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .flag-translation {
-    margin: 6px 0 2px 0;
-    padding: 6px 10px;
-    font-size: 13px;
-  }
-  
-  .flag-translation-header {
-    font-size: 11px;
-    margin-bottom: 4px;
-  }
-  
-  .flag-emoji {
-    font-size: 14px;
-  }
-  
-  .close-translation {
-    font-size: 16px;
-    width: 18px;
-    height: 18px;
-  }
+/* Dark mode support - Enhanced */
+[data-theme="dark"] .flag-translation,
+.dark .flag-translation,
+body.dark .flag-translation {
+  background: #2a3942;
+  color: #e9edef;
+  border-color: #3b4a54;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Integration with WhatsApp's message containers */
-[data-testid="msg-container"] .flag-translation {
-  margin-left: 0;
-  margin-right: 0;
+[data-theme="dark"] .flag-translation.loading,
+.dark .flag-translation.loading,
+body.dark .flag-translation.loading {
+  background: #1f2937;
+  border-color: #374151;
 }
 
-/* Ensure proper spacing in different message types */
-.message-in .flag-translation,
-.message-out .flag-translation {
-  margin-top: 8px;
+[data-theme="dark"] .flag-translation.error,
+.dark .flag-translation.error,
+body.dark .flag-translation.error {
+  background: #991b1b;
+  border-color: #dc2626;
+  color: #fef2f2;
 }
 
-/* Handle quoted messages */
-.quoted-mention + .flag-translation {
-  margin-top: 4px;
-}
-
-/* Accessibility improvements */
-.flag-translation:focus-within {
-  outline: 2px solid #25d366;
-  outline-offset: 2px;
-}
-
-.close-translation:focus {
-  outline: 2px solid #25d366;
-  outline-offset: 2px;
-}
-
-/* Prevent text selection on interactive elements */
+/* Header styling */
 .flag-translation-header {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 10px;
+  color: #667781;
+  font-weight: 600;
 }
 
-/* Ensure translation text is selectable */
+[data-theme="dark"] .flag-translation-header,
+.dark .flag-translation-header,
+body.dark .flag-translation-header {
+  color: #8696a0;
+}
+
+.flag-emoji {
+  font-size: 14px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.translation-status {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 9px;
+}
+
+/* Enhanced close button */
+.close-translation {
+  background: none;
+  border: none;
+  color: #667781;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.close-translation:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #000;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.close-translation:active {
+  transform: scale(0.95);
+}
+
+[data-theme="dark"] .close-translation,
+.dark .close-translation,
+body.dark .close-translation {
+  color: #8696a0;
+}
+
+[data-theme="dark"] .close-translation:hover,
+.dark .close-translation:hover,
+body.dark .close-translation:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* Content styling */
 .translation-content {
-  user-select: text;
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
+  color: #111b21;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+  word-break: break-word;
+}
+
+[data-theme="dark"] .translation-content,
+.dark .translation-content,
+body.dark .translation-content {
+  color: #e9edef;
+}
+
+/* Responsive scaling for different bubble sizes */
+.flag-translation[style*="font-size: 80%"] {
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.flag-translation[style*="font-size: 80%"] .flag-translation-header {
+  margin-bottom: 4px;
+}
+
+.flag-translation[style*="font-size: 120%"] {
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+.flag-translation[style*="font-size: 120%"] .flag-translation-header {
+  margin-bottom: 8px;
+}
+
+.flag-translation[style*="font-size: 120%"] .close-translation {
+  width: 24px;
+  height: 24px;
+  font-size: 18px;
+}
+
+/* Hover effects for better interactivity */
+.flag-translation:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .flag-translation:hover,
+.dark .flag-translation:hover,
+body.dark .flag-translation:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Better integration with WhatsApp's message layout */
+[data-testid="msg-container"] .flag-translation {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* Ensure proper stacking order */
+.flag-translation {
+  z-index: 10;
+  position: relative;
+}
+
+/* Smooth transitions for dynamic changes */
+.flag-translation * {
+  transition: inherit;
+}
+
+/* Print styles - hide translations when printing */
+@media print {
+  .flag-translation {
+    display: none !important;
+  }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .flag-translation {
-    border-left-width: 4px;
-    background: rgba(0, 0, 0, 0.1);
+    border-width: 2px;
+    font-weight: 500;
   }
   
   .flag-translation-header {
-    font-weight: 600;
-  }
-  
-  .close-translation {
-    border: 1px solid currentColor;
+    font-weight: 700;
   }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .flag-translation,
+  .flag-translation {
+    animation: none;
+  }
+  
   .flag-translation.fade-out {
     animation: none;
+    opacity: 0;
   }
   
   .loading-dots span {
     animation: none;
-    opacity: 0.7;
   }
   
-  .close-translation {
-    transition: none;
+  .close-translation:hover {
+    transform: none;
   }
+}
+
+/* Focus styles for accessibility */
+.close-translation:focus {
+  outline: 2px solid #25d366;
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .close-translation:focus,
+.dark .close-translation:focus,
+body.dark .close-translation:focus {
+  outline-color: #4ade80;
 }

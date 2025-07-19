@@ -1,35 +1,46 @@
-# 🌍 WhatsApp Flag Translator
+# 🌍 WhatsApp Flag Translator v2.0
 
 A **Cross-Browser Extension** that enables instant translation of WhatsApp Web messages by reacting with flag emojis. Simply react to any message with a flag emoji (like 🇫🇷 🇯🇵 🇩🇪) and get an instant translation displayed inline.
 
 **Available for:** Chrome (Manifest V3) & Firefox (Manifest V2)
 
-## ✨ Features
+## ✨ New in v2.0
+
+- **🎛️ Comprehensive Settings**: Configurable duration, bubble size, and feature toggles
+- **🎯 Enhanced Flag Detection**: Improved reaction detection with multiple fallback strategies
+- **⚙️ User Preferences**: Toggle auto-hide, flag display, text compression, and caching
+- **🧪 Debug Mode**: Optional console logging for troubleshooting
+- **🎨 Better UI**: Polished popup interface with real-time testing
+- **📊 Status Monitoring**: Extension health and API connectivity indicators
+- **🔄 Settings Sync**: Preferences sync across browser sessions
+
+## ✨ Core Features
 
 - **Instant Translation**: React with flag emojis to translate messages in real-time
 - **40+ Languages**: Support for major world languages including English, Spanish, French, German, Japanese, Chinese, Arabic, and more
 - **Cross-Browser**: Works on both Chrome and Firefox
 - **Inline Display**: Translations appear directly below the original message
-- **Auto-Hide**: Translations automatically disappear after 2 minutes
-- **Smart Compression**: Translations are compressed ~20% while preserving meaning and tone
-- **Caching**: Intelligent caching to avoid redundant API calls
+- **Configurable Duration**: Auto-hide after 30 seconds to 5 minutes (user configurable)
+- **Smart Compression**: Translations can be compressed ~20% while preserving meaning and tone
+- **Intelligent Caching**: Avoid redundant API calls with smart caching system
 - **Dark Mode**: Full support for WhatsApp Web's dark theme
 - **Privacy-First**: No data collection, fully client-side processing
 
 ## 📥 Download & Install
 
-### Quick Download (Recommended)
+### Quick Download (Latest v2.0)
 
 **Ready-to-install extensions:**
 
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Download-blue?style=for-the-badge&logo=google-chrome)](https://github.com/mythicavalon/WhatsApp_Translator_PlugIn/raw/main/release-zips/whatsapp-flag-translator-chrome.zip) [![Firefox Extension](https://img.shields.io/badge/Firefox-Download-orange?style=for-the-badge&logo=firefox)](https://github.com/mythicavalon/WhatsApp_Translator_PlugIn/raw/main/release-zips/whatsapp-flag-translator-firefox.zip)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Download%20v2.0-blue?style=for-the-badge&logo=google-chrome)](https://github.com/mythicavalon/WhatsApp_Translator_PlugIn/raw/main/release-zips/whatsapp-flag-translator-chrome-v2.0.zip) [![Firefox Extension](https://img.shields.io/badge/Firefox-Download%20v2.0-orange?style=for-the-badge&logo=firefox)](https://github.com/mythicavalon/WhatsApp_Translator_PlugIn/raw/main/release-zips/whatsapp-flag-translator-firefox-v2.0.zip)
 
 ### 🎯 Key Features & Browser Support
 
 **🌍 Universal Translation**
 - 40+ languages supported
 - Instant translation with flag emoji reactions
-- Smart text compression (20% shorter while preserving meaning)
+- Configurable text compression (0-20% shorter while preserving meaning)
+- Smart caching system for improved performance
 
 **🔧 Cross-Browser Compatibility**
 - ✅ **Chrome 88+** (Manifest V3)
@@ -38,16 +49,17 @@ A **Cross-Browser Extension** that enables instant translation of WhatsApp Web m
 - ✅ **Opera 74+** (Chromium-based)
 
 **⚡ Performance & UX**
-- Intelligent caching system
-- Auto-hide after 2 minutes
-- WhatsApp-native styling
-- Dark mode support
+- Configurable auto-hide duration (30s - 5min)
+- Adjustable bubble sizes (80% - 120%)
+- Enhanced reaction detection algorithms
+- WhatsApp-native styling with smooth animations
+- Full dark mode support
 - Mobile-responsive design
 
 **🔒 Privacy & Security**
 - No data collection
 - Client-side processing only
-- Secure API key storage
+- Secure API key storage with masking
 - Minimal permissions required
 
 ### 🧪 Manual Installation
@@ -81,7 +93,9 @@ A **Cross-Browser Extension** that enables instant translation of WhatsApp Web m
 1. Click the extension icon in your browser toolbar
 2. Enter your DeepL API key in the popup
 3. Click "Save API Key"
-4. You're ready to translate!
+4. **New**: Test your API key with the "Test Translation" button
+5. Configure your preferences in the Settings section
+6. You're ready to translate!
 
 ### 🎯 How to Use
 
@@ -89,6 +103,23 @@ A **Cross-Browser Extension** that enables instant translation of WhatsApp Web m
 2. Find a message you want to translate
 3. React to it with a flag emoji (e.g., 🇫🇷 for French)
 4. Watch the translation appear below the message!
+5. **New**: Translations will auto-hide after your configured duration
+
+## ⚙️ Settings & Configuration
+
+### Translation Settings
+- **Auto-hide Duration**: 30 seconds to 5 minutes
+- **Bubble Size**: 80% to 120% of normal size
+- **Auto-hide**: Toggle automatic hiding of translations
+- **Show Flag**: Display flag emoji in translation header
+- **Compress Text**: Enable 20% text compression
+- **Cache Translations**: Store translations for faster repeated access
+- **Debug Mode**: Enable console logging for troubleshooting
+
+### API Configuration
+- **API Key Management**: Secure storage with input masking
+- **API Testing**: Built-in translation test functionality
+- **Connection Status**: Real-time API connectivity monitoring
 
 ## 🏳️ Supported Languages
 
@@ -99,213 +130,150 @@ A **Cross-Browser Extension** that enables instant translation of WhatsApp Web m
 | 🇪🇸 | Spanish | es | 🇨🇳 | Chinese | zh |
 | 🇫🇷 | French | fr | 🇷🇺 | Russian | ru |
 | 🇩🇪 | German | de | 🇳🇱 | Dutch | nl |
-| 🇮🇹 | Italian | it | 🇵🇱 | Polish | pl |
-| 🇵🇹 | Portuguese | pt | 🇨🇿 | Czech | cs |
-| 🇧🇷 | Portuguese (BR) | pt-BR | 🇸🇰 | Slovak | sk |
-| 🇮🇳 | Hindi | hi | 🇭🇺 | Hungarian | hu |
-| 🇸🇦 | Arabic | ar | 🇬🇷 | Greek | el |
-| 🇮🇱 | Hebrew | he | 🇹🇷 | Turkish | tr |
-| 🇺🇦 | Ukrainian | uk | 🇷🇴 | Romanian | ro |
-| 🇹🇭 | Thai | th | 🇧🇬 | Bulgarian | bg |
-| 🇻🇳 | Vietnamese | vi | 🇭🇷 | Croatian | hr |
-| 🇮🇩 | Indonesian | id | 🇸🇮 | Slovenian | sl |
-| 🇲🇾 | Malay | ms | 🇱🇹 | Lithuanian | lt |
-| 🇵🇭 | Filipino | tl | 🇱🇻 | Latvian | lv |
-| 🇸🇪 | Swedish | sv | 🇪🇪 | Estonian | et |
-| 🇳🇴 | Norwegian | no | 🇫🇮 | Finnish | fi |
-| 🇩🇰 | Danish | da | | | |
+| 🇮🇹 | Italian | it | 🇸🇪 | Swedish | sv |
+| 🇵🇹 | Portuguese | pt | 🇳🇴 | Norwegian | no |
+| 🇧🇷 | Portuguese (BR) | pt-BR | 🇩🇰 | Danish | da |
+| 🇵🇱 | Polish | pl | 🇫🇮 | Finnish | fi |
+| 🇨🇿 | Czech | cs | 🇭🇺 | Hungarian | hu |
+| 🇸🇰 | Slovak | sk | 🇬🇷 | Greek | el |
+| 🇹🇷 | Turkish | tr | 🇺🇦 | Ukrainian | uk |
+| 🇷🇴 | Romanian | ro | 🇧🇬 | Bulgarian | bg |
+| 🇭🇷 | Croatian | hr | 🇸🇮 | Slovenian | sl |
+| 🇱🇹 | Lithuanian | lt | 🇱🇻 | Latvian | lv |
+| 🇪🇪 | Estonian | et | 🇮🇳 | Hindi | hi |
+| 🇹🇭 | Thai | th | 🇻🇳 | Vietnamese | vi |
+| 🇮🇩 | Indonesian | id | 🇲🇾 | Malay | ms |
+| 🇵🇭 | Filipino | tl | 🇸🇦 | Arabic | ar |
+| 🇦🇪 | Arabic (UAE) | ar | 🇪🇬 | Arabic (Egypt) | ar |
+| 🇮🇱 | Hebrew | he | | | |
 
-## 🔧 Technical Architecture
+## 🧪 Testing
 
-### Project Structure
+We've included a comprehensive testing guide to ensure the extension works perfectly:
 
-```
-whatsapp-flag-translator/
-├── chrome-extension/          # Chrome Extension (Manifest V3)
-│   ├── manifest.json
-│   ├── content.js
-│   ├── popup.html
-│   ├── popup.js
-│   ├── translator-core.js
-│   ├── styles.css
-│   └── icons/
-├── firefox-extension/         # Firefox Extension (Manifest V2)
-│   ├── manifest.json
-│   ├── content.js
-│   ├── popup.html
-│   ├── popup.js
-│   ├── translator-core.js
-│   ├── styles.css
-│   └── icons/
-├── .github/
-│   └── FUNDING.yml           # GitHub Sponsors configuration
-├── README.md                  # This file
-└── LICENSE                    # MIT License
-```
+📋 **[Testing Guide](TESTING_GUIDE.md)** - Complete end-to-end testing instructions
 
-### Key Components
+The testing guide covers:
+- Core functionality tests
+- Settings configuration verification
+- Advanced detection scenarios  
+- Error handling validation
+- UI/UX integration checks
+- Performance and caching tests
+- Cross-browser compatibility
+- Security and privacy verification
 
-- **WhatsAppTranslatorCore**: Core translation logic with 40+ language support
-- **Browser-Specific Wrappers**: Chrome/Firefox API bindings
-- **Consistent UI**: Identical styling and behavior across browsers
-- **Self-Contained**: Each extension folder is complete and ready to install
+## 🔧 Technical Details
 
-### Browser Compatibility
+### Architecture
+- **Manifest V3** (Chrome) and **Manifest V2** (Firefox) compatible
+- **Content Script Injection** for WhatsApp Web integration
+- **Mutation Observer** for real-time reaction detection
+- **Storage API** for settings and caching
+- **Message Passing** for popup-content script communication
 
-- **Chrome**: 88+ (Manifest V3 support)
-- **Firefox**: 78+ (WebExtensions API)
-- **Edge**: 88+ (Chromium-based, use Chrome version)
+### Enhanced Detection System
+- Multiple fallback strategies for reaction detection
+- Improved message container identification
+- Better handling of different message types (text, media, quotes)
+- Robust flag emoji extraction using Unicode ranges
 
-### API Differences Handled
-
-| Feature | Chrome | Firefox |
-|---------|--------|---------|
-| Extension API | `chrome.*` | `browser.*` |
-| Manifest Version | V3 | V2 |
-| Action API | `action` | `browser_action` |
-| Permissions | More restrictive | More permissive |
-
-## 🛠️ Development
-
-### Setup Development Environment
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/whatsapp-flag-translator.git
-cd whatsapp-flag-translator
-
-# Load extensions in browsers
-# Chrome: Load chrome-extension/ folder in Developer Mode
-# Firefox: Load firefox-extension/ folder as Temporary Add-on
-```
-
-### Ready to Use
-
-Both extension folders are **complete and self-contained**:
-- All necessary files included
-- No build process required
-- Ready for immediate installation
-- Ready for store submission
-
-### Testing
-
-1. **Chrome**: Load `chrome-extension/` in Developer Mode
-2. **Firefox**: Load `firefox-extension/` as temporary add-on
-3. Test on WhatsApp Web with different languages
-4. Verify API key management works in both browsers
-
-## 🎨 Customization
-
-### Adding New Languages
-
-1. Edit `translator-core.js` in both extension folders
-2. Add flag emoji and language code to `flagToLanguage` object
-3. Ensure DeepL supports the target language
-4. Update documentation
-
-### Modifying Styles
-
-1. Edit `styles.css` in both extension folders
-2. Test in both light and dark modes
-3. Ensure responsive design works
-4. Keep both versions synchronized
-
-### Browser-Specific Features
-
-- **Chrome**: Modify files in `chrome-extension/` folder
-- **Firefox**: Modify files in `firefox-extension/` folder
-- **Shared Logic**: Update `translator-core.js` in both folders
-
-## 🔒 Privacy & Security
-
-- **No Data Collection**: Extension doesn't collect or store user data
-- **API Key Security**: Keys are stored locally using browser's secure storage
-- **Client-Side Processing**: All logic runs locally in the browser
-- **Minimal Permissions**: Only requests necessary permissions
-- **No External Tracking**: No analytics or tracking scripts
-- **Cross-Browser Consistency**: Same privacy standards on all browsers
-
-## 📦 Distribution
-
-### Chrome Web Store
-
-1. Zip the `chrome-extension/` folder
-2. Upload to Chrome Web Store Developer Dashboard
-3. Follow Chrome Web Store guidelines
-4. Submit for review
-
-### Firefox Add-ons (AMO)
-
-1. Zip the `firefox-extension/` folder
-2. Upload to Firefox Add-on Developer Hub
-3. Follow Mozilla Add-on guidelines
-4. Submit for review
-
-### Manual Installation
-
-Users can install directly from GitHub:
-1. Download the repository
-2. Choose the appropriate extension folder for their browser
-3. Load as unpacked/temporary extension
+### Performance Optimizations
+- Smart caching system to reduce API calls
+- Debounced reaction processing
+- Efficient DOM observation with targeted selectors
+- Memory leak prevention with proper cleanup
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-**Extension not loading:**
-- Ensure you're using the correct browser folder
-- Check manifest.json syntax
-- Verify all referenced files exist
+**Extension not working:**
+1. Ensure you're on WhatsApp Web (web.whatsapp.com)
+2. Check that your DeepL API key is correctly configured
+3. Try refreshing the WhatsApp Web page
+4. Enable Debug Mode in settings to see console logs
 
-**Translation not working:**
-- Verify API key is configured correctly
-- Check browser console for errors
-- Ensure DeepL API has quota remaining
+**Translations not appearing:**
+1. Verify you're using flag emojis (🇫🇷, 🇪🇸, etc.)
+2. Check that the message contains translatable text
+3. Ensure your API key hasn't exceeded its quota
+4. Test your API connection using the "Test Translation" button
 
-**Browser-specific issues:**
-- Chrome: Check Manifest V3 compliance
-- Firefox: Verify WebExtensions API usage
-- Cross-browser: Test shared code compatibility
+**Settings not saving:**
+1. Check browser permissions for the extension
+2. Try resetting settings to defaults
+3. Ensure you have sufficient storage permissions
+
+### Debug Mode
+Enable Debug Mode in the extension settings to see detailed console logs that can help identify issues.
+
+## 🔒 Privacy & Security
+
+- **No Data Collection**: The extension doesn't collect or store any personal data
+- **Local Processing**: All operations happen locally in your browser
+- **Secure API Storage**: API keys are stored securely using browser storage APIs
+- **Minimal Permissions**: Only requests necessary permissions for WhatsApp Web access
+- **No Analytics**: No tracking, analytics, or telemetry
+
+## 📝 Changelog
+
+### v2.0.0 (Latest)
+- ✨ **New**: Comprehensive settings interface with duration, bubble size, and feature toggles
+- ✨ **New**: Enhanced flag detection with multiple fallback strategies
+- ✨ **New**: API key testing and validation functionality
+- ✨ **New**: Debug mode with optional console logging
+- ✨ **New**: Extension status monitoring and health checks
+- ✨ **New**: Settings sync across browser sessions
+- 🎨 **Improved**: Polished UI with better animations and hover effects
+- 🎨 **Improved**: Better error handling and user feedback
+- 🐛 **Fixed**: Various edge cases in message detection
+- 🐛 **Fixed**: Memory leaks and performance issues
+- 📚 **Added**: Comprehensive testing guide
+
+### v1.0.0
+- Initial release with basic flag translation functionality
+- Cross-browser support (Chrome & Firefox)
+- 40+ language support
+- Basic caching system
+- WhatsApp Web integration
 
 ## 🤝 Contributing
 
-Contributions welcome! Please consider:
+Contributions are welcome! Please feel free to:
 
-1. **Core Logic**: Update `translator-core.js` in both extension folders
-2. **Browser-Specific**: Only when necessary for API differences
-3. **Testing**: Test on both Chrome and Firefox
-4. **Documentation**: Update README for any changes
-5. **Synchronization**: Keep both extension folders in sync
+1. **Report Bugs**: Use the issue tracker to report any problems
+2. **Suggest Features**: Share ideas for new functionality
+3. **Submit PRs**: Contribute code improvements
+4. **Test**: Help test the extension across different scenarios
+
+### Development Setup
+
+1. Clone the repository
+2. Make changes to the appropriate extension folder
+3. Test using the manual installation method
+4. Run the testing guide scenarios
+5. Submit a pull request
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## ☕ Support the Project
-
-**Love this extension?** Help keep it maintained and growing! Your support enables continued development, new features, and maintenance.
-
-### 💳 Donate via PayPal
-
-[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/paypalme/amalnair11)
-
-**Why donate?**
-- ✅ Keep the extension free and open source
-- ✅ Support new language additions
-- ✅ Fund regular WhatsApp Web compatibility updates
-- ✅ Enable faster bug fixes and feature development
-
-**Even $1 helps!** Every contribution, no matter how small, makes a difference in keeping this project alive and improving.
-
 ## 🙏 Acknowledgments
 
-- [DeepL](https://www.deepl.com/) for providing excellent translation API
-- [WhatsApp Web](https://web.whatsapp.com/) for the platform
-- Chrome Extensions and Firefox WebExtensions teams
-- Flag emoji designers and Unicode Consortium
+- **DeepL API** for providing excellent translation services
+- **WhatsApp Web** for the platform integration
+- **Contributors** who have helped improve the extension
+- **Users** who provide feedback and bug reports
+
+## 📞 Support
+
+- **Issues**: Report bugs or request features via GitHub Issues
+- **Testing**: Use the comprehensive [Testing Guide](TESTING_GUIDE.md)
+- **Documentation**: Check this README for detailed information
 
 ---
 
-**Made with ❤️ for the global WhatsApp community**
+**Made with ❤️ for the WhatsApp Web community**
 
-**Supports:** Chrome • Firefox • Edge (Chromium)
+*Translate the world, one flag emoji at a time! 🌍*
